@@ -1283,7 +1283,318 @@ The D.AI.L.Y test succeeds if:
 
 ---
 
-# 17. Future Build Order After MVP
+# 17. Milestone 11 — Manual Session Logging
+
+## Goal
+
+Let the user log what happened in a coding session directly from the dashboard.
+
+## Build
+
+* "Log session" button on Project Detail page
+* Session form: date, agent used, summary, problems encountered, recommended next step
+* Saves to `project.lastSession`
+* Updates `project.lastWorkedOn` and `project.lastAgentUsed`
+* Replaces any existing lastSession (one slot; no history list yet)
+
+## Do Not Build
+
+* Session history list (V2)
+* Automated session capture
+* Handoff generation
+* Graphify
+* Pipelines
+* Cloud sync
+
+## Acceptance Criteria
+
+* User opens D.A.I.L.Y and clicks "Log session."
+* Form pre-populates date with today and agent with `project.recommendedAgent`.
+* User fills in summary, problems, next step and saves.
+* Project Detail "Last session" section shows the new entry.
+* `lastWorkedOn` and `lastAgentUsed` update on save.
+* Data persists after Electron restart.
+
+## Claude Code Prompt
+
+```text
+Continue building the AI Project Dashboard MVP.
+
+Current task:
+Build Milestone 11 — Manual Session Logging (first V1 feature).
+
+Read first:
+1. docs/MVP_SPEC.md
+2. AGENT_RULES.md
+3. README.md
+4. docs/BUILD_PLAN.md
+
+Context management: run /compact after this milestone completes before starting the next one.
+
+Build:
+1. "Log session" button on the Project Detail page.
+2. A SessionForm modal: fields for date (default today), agent (default project.recommendedAgent), summary, problems, recommendedNextStep.
+3. onLogSession handler in App.tsx that updates project.lastSession, project.lastAgentUsed, and project.lastWorkedOn.
+4. Wire modal open/close state in ProjectDetail.tsx.
+5. Pass onLogSession down from App through ProjectDetail.
+
+Do not build:
+- Session history list
+- Automated session detection
+- Handoffs
+- Graphify
+- Pipelines
+- Cloud sync
+- New dependencies
+
+Before coding, respond with:
+1. Understanding of the task.
+2. Files to create or modify.
+3. Features you will build.
+4. Features you will intentionally not build.
+5. Risks or assumptions.
+
+After coding, provide:
+1. Summary of changes.
+2. Files changed.
+3. How to test.
+4. Known issues.
+5. What was intentionally not built.
+6. Recommended next task.
+```
+
+## Codex Review Prompt
+
+```text
+Review Milestone 11 — Manual Session Logging.
+
+Read:
+1. docs/MVP_SPEC.md
+2. AGENT_RULES.md
+
+Check:
+1. SessionForm fields match the LastSession type (date, agent, summary, problems, recommendedNextStep).
+2. onLogSession handler updates lastSession, lastWorkedOn, and lastAgentUsed immutably.
+3. Modal open/close state is correct.
+4. Form pre-populates date and agent.
+5. Data persists after Electron restart.
+6. No session history list or automation was added.
+7. TypeScript is clean — no implicit any, no unused imports.
+8. App.tsx prop drilling is minimal and consistent with existing patterns.
+
+Make only minimal fixes.
+
+Required output:
+1. Issues found.
+2. Fixes made.
+3. Files changed.
+4. Remaining risks.
+5. Recommended next task.
+```
+
+---
+
+# 17.5. Milestone 12 — Basic Prompt Generation
+
+## Goal
+
+Let the user generate a ready-to-paste starter prompt for any project, pre-filled with project context, active tasks, Do Not Change rules, and last session notes.
+
+## Build
+
+* "Generate prompt" button on Project Detail page
+* `generatePrompt(project)` utility — pure function, no side effects
+* `PromptCard` component — displays generated text with a "Copy to clipboard" button
+* Prompt includes: project name/type/phase/progress, description, current goal, recommended next step, recommended agent + why, active (non-complete) tasks, Do Not Change rules (Hard Rules first), last session (if any)
+
+## Do Not Build
+
+* API calls or AI-generated text
+* Agent-specific formatting variants
+* Saving or exporting prompts to disk
+* Handoffs, automation, or pipelines
+
+## Acceptance Criteria
+
+* User clicks "Generate prompt" on a project.
+* Modal opens showing a pre-filled text block.
+* "Copy to clipboard" button copies the full prompt.
+* Prompt includes all non-empty fields from the project.
+* Empty fields (no currentGoal, no tasks, etc.) are omitted — no placeholder dashes in the output.
+* Clicking "×" or pressing Escape closes the modal.
+
+## Claude Code Prompt
+
+```text
+Continue building the AI Project Dashboard MVP.
+
+Current task:
+Build Milestone 12 — Basic Prompt Generation (second V1 feature).
+
+Read first:
+1. docs/MVP_SPEC.md
+2. AGENT_RULES.md
+3. README.md
+4. docs/BUILD_PLAN.md
+
+Context management: run /compact after this milestone completes before starting the next one.
+
+Build:
+1. src/renderer/utils/prompt.ts — pure function generatePrompt(project: Project): string.
+   Include: name, type, phase, progress, description, currentGoal, nextStep, recommendedAgent + why,
+   active tasks (non-complete), doNotChangeRules (Hard Rules first), lastSession.
+   Skip empty fields entirely — no "—" placeholders.
+2. src/renderer/components/PromptCard.tsx — renders prompt text in a <pre>, with a "Copy to clipboard" button.
+   Button shows "Copied!" for 2 seconds after success.
+3. ProjectDetail.tsx — add "Generate prompt" button in head-actions.
+   On click: open modal with <PromptCard prompt={generatePrompt(project)} />.
+4. styles.css — add .prompt-card, .prompt-actions, .prompt-text rules.
+
+Do not build:
+- AI generation or API calls
+- Prompt history or saving
+- Agent-specific template variants
+- New dependencies
+
+After coding, provide:
+1. Summary of changes.
+2. Files changed.
+3. How to test.
+4. Known issues.
+5. What was intentionally not built.
+6. Recommended next task.
+```
+
+## Codex Review Prompt
+
+```text
+Review Milestone 12 — Basic Prompt Generation.
+
+Read:
+1. docs/MVP_SPEC.md
+2. AGENT_RULES.md
+
+Check:
+1. generatePrompt is a pure function — no side effects, no imports beyond types.
+2. Empty project fields are omitted from prompt output, not shown as dashes.
+3. doNotChangeRules are sorted Hard Rule → Warning → Note.
+4. PromptCard copy button uses navigator.clipboard.writeText and shows transient "Copied!" state.
+5. Modal open/close state is correct — button in head-actions, modal at bottom of JSX.
+6. No API calls or AI generation added.
+7. TypeScript is clean.
+
+Make only minimal fixes.
+
+Required output:
+1. Issues found.
+2. Fixes made.
+3. Files changed.
+4. Remaining risks.
+5. Recommended next task.
+```
+
+---
+
+# 17.6. Milestone 13 — Better Project Health Score
+
+## Goal
+
+Close the gap between the MVP health logic and the §14.2 example output by incorporating `lastSession` into `computeHealth`. The spec example explicitly lists "No recent session summary" as an attention reason; the current implementation ignores `lastSession` entirely.
+
+## Build
+
+* `computeHealth` now checks `project.lastSession`:
+  * `null` → attention reason "No session logged yet"
+  * `lastSession.date` stale (> 14 days) → attention reason "Last session was X days ago"
+  * Recent → adds "Recent session logged" to Good reasons
+* Good state reasons become more specific:
+  * "N active/ready tasks" instead of generic "Has an active or ready task"
+  * "Recent session logged" when session is fresh
+
+## Do Not Build
+
+* Numeric health percentage (deferred per §14 "Optionally show a percentage later")
+* Phase-specific health rules
+* API calls or AI-generated health analysis
+* New UI components — health reasons already render as a list
+
+## Acceptance Criteria
+
+* Project with no `lastSession` shows "No session logged yet" under Needs Attention.
+* Project with a stale `lastSession.date` shows "Last session was X days ago" under Needs Attention.
+* Project with a recent session logs "Recent session logged" as a Good reason.
+* Good reason "Has an active or ready task" is replaced with the count form ("2 ready tasks", etc.).
+* All existing tests pass — no regressions to Blocked logic.
+
+## Claude Code Prompt
+
+```text
+Continue building the AI Project Dashboard MVP.
+
+Current task:
+Build Milestone 13 — Better Project Health Score (V1 item 4).
+
+Read first:
+1. docs/MVP_SPEC.md (§14 health logic, §14.2 example output)
+2. AGENT_RULES.md
+3. src/renderer/utils/health.ts
+
+Context management: run /compact after this milestone completes before starting the next one.
+
+Change only src/renderer/utils/health.ts:
+1. After the stale check, add a session signal:
+   - project.lastSession === null → push "No session logged yet" to attention[]
+   - lastSession.date is stale (> STALE_DAYS days old) → push "Last session was X days ago"
+2. In the Good reasons block, replace "Has an active or ready task" with the count form:
+   count the Ready + In Progress tasks and use plural() to build "N ready/active task(s)".
+3. In the Good reasons block, add "Recent session logged" when a non-stale session exists.
+4. Keep all existing Blocked logic unchanged.
+
+Do not build:
+- Numeric score / percentage
+- Phase-specific rules
+- New components or pages
+- New dependencies
+
+After coding:
+1. Summary of changes.
+2. Files changed.
+3. How to test.
+4. Known issues.
+5. Recommended next task.
+```
+
+## Codex Review Prompt
+
+```text
+Review Milestone 13 — Better Project Health Score.
+
+Read:
+1. docs/MVP_SPEC.md §14
+2. src/renderer/utils/health.ts
+
+Check:
+1. lastSession null → "No session logged yet" appears in attention reasons.
+2. Stale lastSession.date → "Last session was X days ago" appears.
+3. Recent session → "Recent session logged" appears in Good reasons.
+4. Good reason uses count form for active/ready tasks.
+5. Blocked logic unchanged.
+6. No new imports, no new components, no numeric score.
+7. TypeScript clean.
+
+Make only minimal fixes.
+
+Required output:
+1. Issues found.
+2. Fixes made.
+3. Files changed.
+4. Remaining risks.
+5. Recommended next task.
+```
+
+---
+
+# 18. Future Build Order After MVP
 
 After the MVP dashboard works, build future features in this order.
 

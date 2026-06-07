@@ -65,3 +65,21 @@
 - No product feature or architecture changes were needed for M10.
 - Remove accidental workspace data artifacts instead of committing runtime-generated JSON.
 - Keep dependency-toolchain upgrades separate from milestone documentation when the worktree contains both.
+
+## 2026-06-07 — M11–M13 V1 workflow reviews
+
+### Lessons learned
+- Session logging must distinguish creating a new session from editing the previous one. A new log should always default to today, the recommended agent, and blank narrative fields rather than pre-populating stale session content.
+- Verify local persistence with a complete Electron termination and restart using the same isolated profile. Keep `HOME` and Chromium user data inside a workspace-only review directory and pass `--password-store=basic` to avoid macOS Keychain prompts.
+- Test prompt generation with sparse synthetic projects, not only complete seed data. This exposed blank session labels and a dangling instruction to address a missing next step.
+- Preserve utility purity through non-mutating array operations. Filtering before sorting prevents `generatePrompt` from reordering the project's stored Do Not Change rules.
+- Clipboard tests need a genuinely focused Electron window. Background CDP calls can trigger Chromium permission rejection even when the production click path is correct; verify both the transient `Copied!` state and exact clipboard readback.
+- Clipboard rejection must be handled even when the normal focused path succeeds, otherwise denied permissions produce an unhandled promise rejection.
+- Time-based health logic is easiest to review with a fixed `now` value and table-driven project variants. Compare Blocked results directly with the pre-change implementation to prove precedence and wording remain unchanged.
+- In a mixed worktree, stage explicit files and inspect the cached diff before committing. M11/M12 renderer work, M13 health logic, documentation, Electron upgrades, and generated Graphify output should remain independently attributable.
+
+### M11–M13 results
+- M11 session logging matches `LastSession`, updates projects immutably, defaults new logs correctly, and persists through an Electron restart.
+- M12 prompt generation is pure, omits empty fields, orders rules by severity, copies the complete prompt, and closes through Escape or the close button.
+- M13 treats missing and stale sessions as attention signals, reports recent sessions in Good reasons, and preserves both existing Blocked paths.
+- Type checking, production builds, and whitespace checks passed after the focused fixes.

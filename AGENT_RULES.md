@@ -63,3 +63,7 @@ Every coding agent must end with:
 5. What was intentionally not built
 6. Recommended next step
 
+## Context Management
+
+After each milestone completes, run `/compact` before starting the next milestone. This preserves token budget across milestones. Do not start a new milestone in a context window that already contains a completed one.
+
