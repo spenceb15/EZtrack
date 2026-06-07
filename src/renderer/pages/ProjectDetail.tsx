@@ -17,6 +17,7 @@ import { Modal } from '../components/Modal'
 import { ProjectForm, type ProjectFormValues } from '../components/ProjectForm'
 import { TaskForm, type TaskFormValues } from '../components/TaskForm'
 import { RuleForm, type RuleFormValues } from '../components/RuleForm'
+import { KnowledgeNoteForm, type KnowledgeNoteFormValues } from '../components/KnowledgeNoteForm'
 import { RecommendationCard } from '../components/RecommendationCard'
 import { SessionForm, type SessionFormValues } from '../components/SessionForm'
 import { PromptCard } from '../components/PromptCard'
@@ -33,7 +34,8 @@ export function ProjectDetail({
   onUpdateTask,
   onSetTaskStatus,
   onAddRule,
-  onLogSession
+  onLogSession,
+  onAddKnowledgeNote
 }: {
   project: Project | null
   agents: Agent[]
@@ -44,12 +46,14 @@ export function ProjectDetail({
   onSetTaskStatus: (projectId: string, taskId: string, status: Task['status']) => void
   onAddRule: (projectId: string, values: RuleFormValues) => void
   onLogSession: (projectId: string, values: SessionFormValues) => void
+  onAddKnowledgeNote: (projectId: string, values: KnowledgeNoteFormValues) => void
 }) {
   const [editingProject, setEditingProject] = useState(false)
   // null = closed; { task: null } = add; { task } = edit
   const [taskModal, setTaskModal] = useState<{ task: Task | null } | null>(null)
   const [showRec, setShowRec] = useState(false)
   const [addingRule, setAddingRule] = useState(false)
+  const [addingNote, setAddingNote] = useState(false)
   const [loggingSession, setLoggingSession] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
   const [exportStatus, setExportStatus] = useState<'idle' | 'saved' | 'cancelled' | 'failed'>('idle')
@@ -260,32 +264,57 @@ export function ProjectDetail({
         )}
       </Section>
 
-      <Section title="Last session">
-        {project.lastSession ? (
-          <div className="detail-grid">
-            <div>
-              <span className="field-label">Date</span>
-              <span className="field-value">{formatDate(project.lastSession.date)}</span>
-            </div>
-            <div>
-              <span className="field-label">Agent</span>
-              <span className="field-value">{project.lastSession.agent}</span>
-            </div>
-            <div className="span-2">
-              <span className="field-label">Summary</span>
-              <span className="field-value">{project.lastSession.summary}</span>
-            </div>
-            <div className="span-2">
-              <span className="field-label">Problems</span>
-              <span className="field-value">{project.lastSession.problems}</span>
-            </div>
-            <div className="span-2">
-              <span className="field-label">Recommended next step</span>
-              <span className="field-value">{project.lastSession.recommendedNextStep}</span>
-            </div>
-          </div>
+      <Section title="Knowledge">
+        <div className="section-actions">
+          <button className="btn btn-primary btn-sm" onClick={() => setAddingNote(true)}>
+            Add note
+          </button>
+        </div>
+        {(project.knowledgeNotes ?? []).length === 0 ? (
+          <EmptyState message="No knowledge notes yet. Add context, decisions, or constraints." />
         ) : (
-          <EmptyState message="No session logged yet." />
+          <ul className="rule-list">
+            {(project.knowledgeNotes ?? []).map((note) => (
+              <li key={note.id} className="rule-item">
+                <div>
+                  <div className="field-value">{note.title}</div>
+                  <div className="why-text">{note.body}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title="Session history">
+        {(project.sessionHistory ?? []).length === 0 ? (
+          <EmptyState message='No sessions logged yet. Click "Log session" to record your first one.' />
+        ) : (
+          <ul className="task-list">
+            {(project.sessionHistory ?? []).map((s, i) => (
+              <li key={i} className="card task-item">
+                <div className="task-head">
+                  <span className="task-title">{formatDate(s.date)}</span>
+                  <span className="task-badges">
+                    <span className="badge badge-agent">{s.agent}</span>
+                  </span>
+                </div>
+                {s.summary && <p className="field-value">{s.summary}</p>}
+                {s.problems && (
+                  <div className="field">
+                    <span className="field-label">Problems</span>
+                    <span className="field-value">{s.problems}</span>
+                  </div>
+                )}
+                {s.recommendedNextStep && (
+                  <div className="field">
+                    <span className="field-label">Recommended next step</span>
+                    <span className="field-value">{s.recommendedNextStep}</span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </Section>
 
@@ -333,6 +362,18 @@ export function ProjectDetail({
               setAddingRule(false)
             }}
             onCancel={() => setAddingRule(false)}
+          />
+        </Modal>
+      )}
+
+      {addingNote && (
+        <Modal title="Add knowledge note" onClose={() => setAddingNote(false)}>
+          <KnowledgeNoteForm
+            onSubmit={(values) => {
+              onAddKnowledgeNote(project.id, values)
+              setAddingNote(false)
+            }}
+            onCancel={() => setAddingNote(false)}
           />
         </Modal>
       )}

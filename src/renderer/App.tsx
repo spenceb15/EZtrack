@@ -6,12 +6,13 @@ import { ProjectDetail } from './pages/ProjectDetail'
 import { Agents } from './pages/Agents'
 import { Settings } from './pages/Settings'
 import { seedData } from './data/seed'
-import type { AppData, DoNotChangeRule, NavKey, Project, Task, TaskStatus } from './types'
+import type { AppData, DoNotChangeRule, KnowledgeNote, NavKey, Project, Task, TaskStatus } from './types'
 import { isAppData } from './utils/appData'
 import { makeId, today } from './utils/id'
 import type { ProjectFormValues } from './components/ProjectForm'
 import type { TaskFormValues } from './components/TaskForm'
 import type { RuleFormValues } from './components/RuleForm'
+import type { KnowledgeNoteFormValues } from './components/KnowledgeNoteForm'
 import type { SessionFormValues } from './components/SessionForm'
 
 export function App() {
@@ -98,7 +99,9 @@ export function App() {
       tasks: [],
       doNotChangeRules: [],
       lastSession: null,
-      agentUsageCounts: {}
+      sessionHistory: [],
+      agentUsageCounts: {},
+      knowledgeNotes: []
     }
     persist({ ...current, projects: [...current.projects, project] })
     setSelectedProjectId(project.id)
@@ -188,6 +191,16 @@ export function App() {
                 problems: values.problems,
                 recommendedNextStep: values.recommendedNextStep
               },
+              sessionHistory: [
+                {
+                  date: values.date,
+                  agent: values.agent,
+                  summary: values.summary,
+                  problems: values.problems,
+                  recommendedNextStep: values.recommendedNextStep
+                },
+                ...(p.sessionHistory ?? [])
+              ],
               agentUsageCounts: {
                 ...(p.agentUsageCounts ?? {}),
                 [values.agent]: ((p.agentUsageCounts ?? {})[values.agent] ?? 0) + 1
@@ -214,6 +227,27 @@ export function App() {
               ...project,
               lastWorkedOn: today(),
               doNotChangeRules: [...project.doNotChangeRules, rule]
+            }
+          : project
+      )
+    })
+  }
+
+  const addKnowledgeNote = (projectId: string, values: KnowledgeNoteFormValues) => {
+    const current = dataRef.current
+    if (!current) return
+    const note: KnowledgeNote = {
+      id: makeId('note'),
+      ...values,
+      createdAt: today()
+    }
+    persist({
+      ...current,
+      projects: current.projects.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              knowledgeNotes: [...(project.knowledgeNotes ?? []), note]
             }
           : project
       )
@@ -274,6 +308,7 @@ export function App() {
             onSetTaskStatus={setTaskStatus}
             onAddRule={addRule}
             onLogSession={logSession}
+            onAddKnowledgeNote={addKnowledgeNote}
           />
         )}
         {nav === 'agents' && <Agents agents={data.agents} />}

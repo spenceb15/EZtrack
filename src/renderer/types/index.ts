@@ -30,6 +30,13 @@ export interface DoNotChangeRule {
   createdAt: string
 }
 
+export interface KnowledgeNote {
+  id: string
+  title: string
+  body: string
+  createdAt: string
+}
+
 export interface LastSession {
   date: string
   agent: string
@@ -55,8 +62,10 @@ export interface Project {
   tasks: Task[]
   doNotChangeRules: DoNotChangeRule[]
   lastSession: LastSession | null
+  sessionHistory?: LastSession[]
   notes: string
   agentUsageCounts?: Record<string, number>
+  knowledgeNotes?: KnowledgeNote[]
 }
 
 export interface Agent {

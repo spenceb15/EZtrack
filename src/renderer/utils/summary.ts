@@ -74,23 +74,36 @@ export function generateSummary(project: Project): string {
     }
   }
 
-  if (project.lastSession) {
-    const s = project.lastSession
+  const sessionHistory = project.sessionHistory ?? (project.lastSession ? [project.lastSession] : [])
+  if (sessionHistory.length > 0) {
     lines.push('')
-    lines.push('## Last Session')
-    if (hasText(s.date)) lines.push(`**Date:** ${formatDate(s.date)}`)
-    if (hasText(s.agent)) lines.push(`**Agent:** ${s.agent}`)
-    if (hasText(s.summary)) {
+    lines.push('## Session History')
+    for (const s of sessionHistory) {
       lines.push('')
-      lines.push(`**Summary:** ${s.summary}`)
+      const heading = [hasText(s.date) ? formatDate(s.date) : '', hasText(s.agent) ? s.agent : '']
+        .filter(Boolean)
+        .join(' · ')
+      lines.push(`### ${heading}`)
+      if (hasText(s.summary)) lines.push(s.summary)
+      if (hasText(s.problems)) {
+        lines.push('')
+        lines.push(`**Problems:** ${s.problems}`)
+      }
+      if (hasText(s.recommendedNextStep)) {
+        lines.push('')
+        lines.push(`**Recommended next step:** ${s.recommendedNextStep}`)
+      }
     }
-    if (hasText(s.problems)) {
+  }
+
+  const knowledgeNotes = project.knowledgeNotes ?? []
+  if (knowledgeNotes.length > 0) {
+    lines.push('')
+    lines.push('## Knowledge')
+    for (const note of knowledgeNotes) {
       lines.push('')
-      lines.push(`**Problems:** ${s.problems}`)
-    }
-    if (hasText(s.recommendedNextStep)) {
-      lines.push('')
-      lines.push(`**Recommended next step:** ${s.recommendedNextStep}`)
+      lines.push(`### ${note.title}`)
+      lines.push(note.body)
     }
   }
 

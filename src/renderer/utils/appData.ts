@@ -5,6 +5,7 @@ import type {
   AppSettings,
   DoNotChangeRule,
   Health,
+  KnowledgeNote,
   LastSession,
   Phase,
   Priority,
@@ -45,6 +46,16 @@ function isTask(value: unknown): value is Task {
     typeof value.whyThisAgent === 'string' &&
     isStringArray(value.acceptanceCriteria) &&
     typeof value.notes === 'string'
+  )
+}
+
+function isKnowledgeNote(value: unknown): value is KnowledgeNote {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.body === 'string' &&
+    typeof value.createdAt === 'string'
   )
 }
 
@@ -93,9 +104,13 @@ function isProject(value: unknown): value is Project {
     value.doNotChangeRules.every(isRule) &&
     (value.lastSession === null || isLastSession(value.lastSession)) &&
     typeof value.notes === 'string' &&
+    (value.sessionHistory === undefined ||
+      (Array.isArray(value.sessionHistory) && value.sessionHistory.every(isLastSession))) &&
     (value.agentUsageCounts === undefined ||
       (isRecord(value.agentUsageCounts) &&
-        Object.values(value.agentUsageCounts).every((v) => typeof v === 'number')))
+        Object.values(value.agentUsageCounts).every((v) => typeof v === 'number'))) &&
+    (value.knowledgeNotes === undefined ||
+      (Array.isArray(value.knowledgeNotes) && value.knowledgeNotes.every(isKnowledgeNote)))
   )
 }
 

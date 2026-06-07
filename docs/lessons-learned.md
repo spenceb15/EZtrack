@@ -78,6 +78,39 @@
 - Time-based health logic is easiest to review with a fixed `now` value and table-driven project variants. Compare Blocked results directly with the pre-change implementation to prove precedence and wording remain unchanged.
 - In a mixed worktree, stage explicit files and inspect the cached diff before committing. M11/M12 renderer work, M13 health logic, documentation, Electron upgrades, and generated Graphify output should remain independently attributable.
 
+## 2026-06-07 — M17 Simple Project History
+
+### Lessons learned
+- Keep the single `lastSession` field — it's already used by `computeHealth` and `generatePrompt` for current-state signals. Add `sessionHistory` alongside it rather than replacing it; the two serve different purposes.
+- Prepend new entries (`[newSession, ...existing]`) rather than append so the list is newest-first at storage time — no sort needed at render time.
+- For the export fallback, `project.sessionHistory ?? (project.lastSession ? [project.lastSession] : [])` preserves the single session for old data without a history array, so exports stay useful after upgrading.
+- The "Last session" display section is a natural candidate to become "Session history" — when there's one entry it looks identical, when there are many it shows the full log. No new section is needed.
+- The curly-quote `"…"` form inside JSX string attributes causes a TypeScript parse error; use single-quoted outer string (`'…'`) or escape characters.
+
+### M17 results
+- `sessionHistory?: LastSession[]` added to `Project` type and validated as optional in `isProject`.
+- `createProject` initializes `sessionHistory: []`; `logSession` prepends each new entry.
+- "Last session" section replaced with "Session history" — all entries newest-first as cards.
+- `generateSummary` exports full history with fallback for legacy data.
+- Seed project updated with its one initial session in `sessionHistory`.
+- Type check and production build both pass (56 modules, 306.31 kB).
+
+## 2026-06-07 — M16 Knowledge Notes
+
+### Lessons learned
+- The same optional-field pattern (`?` in type, `=== undefined || Array.isArray(...)` in validator) applies to array fields as well as record fields. Missing means no data yet; present must be structurally valid.
+- Add-only list features follow the Do Not Change rules pattern exactly: `makeId` + `today()` in the handler, spread-append in `persist`, empty-state in the UI, modal form with a new `FormValues` type.
+- Knowledge notes belong in both `generatePrompt` (AI context) and `generateSummary` (archival export). They are the same kind of content as Description and Current Goal — contextual facts the AI needs.
+- `knowledgeNotes ?? []` at every read site avoids null checks in render and utility functions without mutating the stored data.
+
+### M16 results
+- `KnowledgeNote` type added; `knowledgeNotes?: KnowledgeNote[]` field added to `Project`.
+- `isProject` validator accepts the field as optional with structural check when present.
+- `createProject` initializes `knowledgeNotes: []`; `addKnowledgeNote` appends immutably.
+- "Knowledge" section in Project Detail with "Add note" button, list, and empty state.
+- Notes included in `generatePrompt` (`### Knowledge`) and `generateSummary` (`## Knowledge`).
+- Type check and production build both pass (56 modules, 305.92 kB).
+
 ## 2026-06-07 — M15 Agent Usage Tracking
 
 ### Lessons learned

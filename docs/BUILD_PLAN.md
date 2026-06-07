@@ -1665,6 +1665,79 @@ Show how many sessions each agent has been used for on a project, so the user ca
 
 ---
 
+# 17.9. Milestone 16 — Knowledge Notes
+
+## Goal
+
+Let the user store discrete, titled pieces of context per project — architecture decisions, key constraints, terminology, or reference snippets — that grow over time and appear in generated prompts and exports.
+
+## Build
+
+* `KnowledgeNote` type: `{ id, title, body, createdAt }`
+* `knowledgeNotes?: KnowledgeNote[]` on `Project` (optional for backward compat)
+* `isProject` validator accepts the field as optional — absent means no notes yet
+* `createProject` initializes `knowledgeNotes: []`
+* `addKnowledgeNote` handler in `App.tsx` — appends to the project's list
+* "Knowledge" section in Project Detail — "Add note" button, list of notes, empty state
+* `KnowledgeNoteForm` component — title (required) + body (required)
+* `generatePrompt` includes `### Knowledge` block when notes exist
+* `generateSummary` includes `## Knowledge` section when notes exist
+
+## Do Not Build
+
+* Editing or deleting notes
+* Search or filter
+* Tags or categories
+* Auto-generated notes
+* Note reordering
+
+## Acceptance Criteria
+
+* User can add a knowledge note (title + body) to a project.
+* Notes appear in the "Knowledge" section on the Project Detail page.
+* Notes persist across Electron restarts.
+* Notes appear in the generated prompt (`### Knowledge`).
+* Notes appear in the exported summary (`## Knowledge`).
+* New projects start with an empty notes list.
+* Existing saved data without `knowledgeNotes` loads without error.
+
+---
+
+# 17.10. Milestone 17 — Simple Project History
+
+## Goal
+
+Keep a growing log of all sessions the user has logged, so they can look back at what happened across multiple work sessions rather than only seeing the most recent one.
+
+## Build
+
+* `sessionHistory?: LastSession[]` on `Project` (optional for backward compat — newest-first)
+* `isProject` validator accepts the field as optional — missing means no history yet, present must be `LastSession[]`
+* `createProject` initializes `sessionHistory: []`
+* `logSession` prepends the new session entry to `sessionHistory` (in addition to setting `lastSession`)
+* "Last session" section in Project Detail replaced with "Session history" — all entries, newest first
+* `generateSummary` exports full session history; falls back to `[lastSession]` for old data that predates this field
+* `generatePrompt` unchanged — still uses `lastSession` (most recent, avoids bloating AI context)
+* Seed project updated: `sessionHistory` initialized with its one existing session
+
+## Do Not Build
+
+* Edit or delete history entries
+* Pagination or collapsing
+* Timeline visualization
+* Search or filter
+
+## Acceptance Criteria
+
+* Logging a session adds it to the top of the history list.
+* History list appears in Project Detail, newest first.
+* All session entries survive Electron restart.
+* Existing saved data without `sessionHistory` loads without error.
+* Export summary includes full session history.
+* Generated prompt is unchanged (still uses only `lastSession`).
+
+---
+
 # 18. Future Build Order After MVP
 
 After the MVP dashboard works, build future features in this order.

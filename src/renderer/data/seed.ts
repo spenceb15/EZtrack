@@ -145,6 +145,16 @@ export const seedData: AppData = {
         recommendedNextStep:
           'Use Codex to remove the Byte box without redesigning the mascot or changing glow rings.'
       },
+      sessionHistory: [
+        {
+          date: '2026-06-06',
+          agent: 'Claude Code',
+          summary: 'Updated the dashboard UI and made onboarding changes.',
+          problems: 'Byte mascot was accidentally placed inside an unwanted box.',
+          recommendedNextStep:
+            'Use Codex to remove the Byte box without redesigning the mascot or changing glow rings.'
+        }
+      ],
       notes: 'Preserve local-first architecture. Keep lesson logic stable.',
       agentUsageCounts: { 'Claude Code': 1 }
     }

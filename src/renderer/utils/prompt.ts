@@ -35,6 +35,15 @@ export function generatePrompt(project: Project): string {
     lines.push(`Why: ${project.whyThisAgent}`)
   }
 
+  const knowledgeNotes = project.knowledgeNotes ?? []
+  if (knowledgeNotes.length > 0) {
+    lines.push('')
+    lines.push('### Knowledge')
+    for (const note of knowledgeNotes) {
+      lines.push(`**${note.title}:** ${note.body}`)
+    }
+  }
+
   const activeTasks = project.tasks.filter((t) => t.status !== 'Complete')
   if (activeTasks.length > 0) {
     lines.push('')
