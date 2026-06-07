@@ -35,11 +35,14 @@ export function computeHealth(project: Project, now = Date.now()): HealthResult 
   const { tasks } = project
   const blocked = tasks.filter((t) => t.status === 'Blocked')
   const criticalBlocked = blocked.filter((t) => t.priority === 'Critical')
-  const hasActionable = tasks.some((t) => t.status === 'Ready' || t.status === 'In Progress')
+  const actionable = tasks.filter((t) => t.status === 'Ready' || t.status === 'In Progress')
   const hasNextStep = project.nextStep.trim().length > 0
   const hasRules = project.doNotChangeRules.length > 0
   const stale = daysSince(project.lastWorkedOn, now)
   const isStale = stale !== null && stale > STALE_DAYS
+
+  const sessionAge = project.lastSession ? daysSince(project.lastSession.date, now) : null
+  const sessionStale = sessionAge !== null && sessionAge > STALE_DAYS
 
   // The stored field remains the MVP's manual "project blocked" signal.
   if (project.health === 'Blocked') {
@@ -54,17 +57,28 @@ export function computeHealth(project: Project, now = Date.now()): HealthResult 
   // Needs Attention — any warning sign.
   const attention: string[] = []
   if (tasks.length === 0) attention.push('No tasks yet')
-  else if (!hasActionable) attention.push('No active or ready task')
+  else if (actionable.length === 0) attention.push('No active or ready task')
   if (!hasNextStep) attention.push('No next step defined')
   if (blocked.length > 0) attention.push(`${plural(blocked.length, 'blocked task')}`)
   if (!hasRules) attention.push('No Do Not Change rules')
   if (stale === null) attention.push('Last worked date is missing or invalid')
   else if (isStale) attention.push(`Not updated in ${stale} days`)
+  if (project.lastSession === null) attention.push('No session logged yet')
+  else if (sessionStale) attention.push(`Last session was ${sessionAge} days ago`)
   if (attention.length > 0) return { health: 'Needs Attention', reasons: attention }
 
-  // Good — has an active/ready task, a next step, rules, and nothing blocked.
-  return {
-    health: 'Good',
-    reasons: ['Has an active or ready task', 'Next step is defined', 'No critical blocked tasks', 'Do Not Change rules exist']
-  }
+  // Good — all signals are positive.
+  const actionableLabel =
+    actionable.length === 1
+      ? `1 ${actionable[0].status === 'In Progress' ? 'in-progress' : 'ready'} task`
+      : `${actionable.length} active tasks`
+
+  const goodReasons = [
+    actionableLabel,
+    'Next step is defined',
+    'No critical blocked tasks',
+    'Do Not Change rules exist',
+    'Recent session logged'
+  ]
+  return { health: 'Good', reasons: goodReasons }
 }
