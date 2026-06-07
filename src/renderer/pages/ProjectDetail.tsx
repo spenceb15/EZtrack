@@ -18,7 +18,10 @@ import { ProjectForm, type ProjectFormValues } from '../components/ProjectForm'
 import { TaskForm, type TaskFormValues } from '../components/TaskForm'
 import { RuleForm, type RuleFormValues } from '../components/RuleForm'
 import { RecommendationCard } from '../components/RecommendationCard'
+import { SessionForm, type SessionFormValues } from '../components/SessionForm'
+import { PromptCard } from '../components/PromptCard'
 import { recommendForProject } from '../utils/nextStep'
+import { generatePrompt } from '../utils/prompt'
 
 export function ProjectDetail({
   project,
@@ -28,7 +31,8 @@ export function ProjectDetail({
   onAddTask,
   onUpdateTask,
   onSetTaskStatus,
-  onAddRule
+  onAddRule,
+  onLogSession
 }: {
   project: Project | null
   agents: Agent[]
@@ -38,12 +42,15 @@ export function ProjectDetail({
   onUpdateTask: (projectId: string, taskId: string, values: TaskFormValues) => void
   onSetTaskStatus: (projectId: string, taskId: string, status: Task['status']) => void
   onAddRule: (projectId: string, values: RuleFormValues) => void
+  onLogSession: (projectId: string, values: SessionFormValues) => void
 }) {
   const [editingProject, setEditingProject] = useState(false)
   // null = closed; { task: null } = add; { task } = edit
   const [taskModal, setTaskModal] = useState<{ task: Task | null } | null>(null)
   const [showRec, setShowRec] = useState(false)
   const [addingRule, setAddingRule] = useState(false)
+  const [loggingSession, setLoggingSession] = useState(false)
+  const [promptOpen, setPromptOpen] = useState(false)
 
   if (!project) {
     return (
@@ -74,6 +81,12 @@ export function ProjectDetail({
           <HealthBadge health={health.health} />
           <button className="btn btn-primary" onClick={() => setShowRec((s) => !s)}>
             What should I do next?
+          </button>
+          <button className="btn btn-ghost" onClick={() => setPromptOpen(true)}>
+            Generate prompt
+          </button>
+          <button className="btn btn-ghost" onClick={() => setLoggingSession(true)}>
+            Log session
           </button>
           <button className="btn btn-ghost" onClick={() => setEditingProject(true)}>
             Edit project
@@ -281,6 +294,26 @@ export function ProjectDetail({
               setAddingRule(false)
             }}
             onCancel={() => setAddingRule(false)}
+          />
+        </Modal>
+      )}
+
+      {promptOpen && (
+        <Modal title="Generated prompt" onClose={() => setPromptOpen(false)}>
+          <PromptCard prompt={generatePrompt(project)} />
+        </Modal>
+      )}
+
+      {loggingSession && (
+        <Modal title="Log session" onClose={() => setLoggingSession(false)}>
+          <SessionForm
+            defaultAgent={project.recommendedAgent}
+            agents={agents}
+            onSubmit={(values) => {
+              onLogSession(project.id, values)
+              setLoggingSession(false)
+            }}
+            onCancel={() => setLoggingSession(false)}
           />
         </Modal>
       )}

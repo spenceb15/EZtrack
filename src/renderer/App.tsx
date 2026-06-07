@@ -12,6 +12,7 @@ import { makeId, today } from './utils/id'
 import type { ProjectFormValues } from './components/ProjectForm'
 import type { TaskFormValues } from './components/TaskForm'
 import type { RuleFormValues } from './components/RuleForm'
+import type { SessionFormValues } from './components/SessionForm'
 
 export function App() {
   const [nav, setNav] = useState<NavKey>('dashboard')
@@ -168,6 +169,30 @@ export function App() {
     })
   }
 
+  const logSession = (projectId: string, values: SessionFormValues) => {
+    const current = dataRef.current
+    if (!current) return
+    persist({
+      ...current,
+      projects: current.projects.map((p) =>
+        p.id === projectId
+          ? {
+              ...p,
+              lastAgentUsed: values.agent,
+              lastWorkedOn: today(),
+              lastSession: {
+                date: values.date,
+                agent: values.agent,
+                summary: values.summary,
+                problems: values.problems,
+                recommendedNextStep: values.recommendedNextStep
+              }
+            }
+          : p
+      )
+    })
+  }
+
   const addRule = (projectId: string, values: RuleFormValues) => {
     const current = dataRef.current
     if (!current) return
@@ -243,6 +268,7 @@ export function App() {
             onUpdateTask={updateTask}
             onSetTaskStatus={setTaskStatus}
             onAddRule={addRule}
+            onLogSession={logSession}
           />
         )}
         {nav === 'agents' && <Agents agents={data.agents} />}

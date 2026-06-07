@@ -803,3 +803,31 @@ body {
     flex-direction: column;
   }
 }
+
+/* ---------- Prompt card ---------- */
+.prompt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.prompt-text {
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 480px;
+  overflow-y: auto;
+  margin: 0;
+}
