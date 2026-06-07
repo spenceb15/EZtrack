@@ -63,11 +63,24 @@ function createWindow(): void {
 
   win.on('ready-to-show', () => win.show())
 
+  // Block in-page navigation away from the app's own content. setWindowOpenHandler
+  // covers window.open; this covers link clicks / location changes to remote origins.
+  win.webContents.on('will-navigate', (event, url) => {
+    const allowed = process.env['ELECTRON_RENDERER_URL']
+    if (!allowed || !url.startsWith(allowed)) event.preventDefault()
+  })
+
   // Open external links in the system browser, never in-app.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    const protocol = new URL(url).protocol
-    if (protocol === 'https:' || protocol === 'http:') {
-      void shell.openExternal(url)
+    // Deny by default; only hand off well-formed http(s) URLs to the OS browser.
+    // A malformed URL throws in the URL constructor — swallow it and still deny.
+    try {
+      const protocol = new URL(url).protocol
+      if (protocol === 'https:' || protocol === 'http:') {
+        void shell.openExternal(url)
+      }
+    } catch {
+      // Ignore unparseable URLs.
     }
     return { action: 'deny' }
   })
