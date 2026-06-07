@@ -1,5 +1,10 @@
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { join } from 'path'
+
+// Prevent Chromium from prompting for macOS Keychain access.
+// This app stores nothing sensitive — session data doesn't need OS-level encryption.
+app.commandLine.appendSwitch('password-store', 'basic')
+app.commandLine.appendSwitch('use-mock-keychain')
 import { homedir } from 'os'
 import { promises as fs } from 'fs'
 import { randomUUID } from 'crypto'
