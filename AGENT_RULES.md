@@ -24,6 +24,35 @@ Build a simple local-first dashboard that helps the user:
 * Track Do Not Change rules
 * See last session summary
 
+## Knowledge Graph
+
+This is a developer tool to help coding agents navigate this codebase — it is not an app feature.
+Do not confuse it with "Graphify integration" in the Do Not Build list, which refers to a future
+product feature that lets the dashboard automatically graph the projects it tracks.
+
+This project has a graphify knowledge graph covering all source files and docs.
+Query it before reading any doc in full:
+
+```
+graphify-out/.venv/bin/graphify query "<your question>"
+```
+
+Example queries:
+```
+graphify-out/.venv/bin/graphify query "What is the source of truth hierarchy?"
+graphify-out/.venv/bin/graphify query "What features are explicitly out of scope?"
+graphify-out/.venv/bin/graphify query "Where is data persistence handled?"
+graphify-out/.venv/bin/graphify query "What data types exist and where are they defined?"
+```
+
+Use `--dfs` to trace a specific execution path:
+```
+graphify-out/.venv/bin/graphify query "persist save flow" --dfs
+```
+
+Query first to orient. Read a specific file only when you need exact implementation details.
+Source of truth when docs conflict: `docs/MVP_SPEC.md` wins.
+
 ## Do Not Build Yet
 
 Do not build:
@@ -66,4 +95,12 @@ Every coding agent must end with:
 ## Context Management
 
 After each milestone completes, run `/compact` before starting the next milestone. This preserves token budget across milestones. Do not start a new milestone in a context window that already contains a completed one.
+
+After each milestone completes, update the knowledge graph so it reflects the new files:
+
+```
+/graphify . --update
+```
+
+Run this the same way you run `/compact` — at the end of every milestone, before moving on.
 

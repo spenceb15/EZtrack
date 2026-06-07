@@ -78,6 +78,37 @@
 - Time-based health logic is easiest to review with a fixed `now` value and table-driven project variants. Compare Blocked results directly with the pre-change implementation to prove precedence and wording remain unchanged.
 - In a mixed worktree, stage explicit files and inspect the cached diff before committing. M11/M12 renderer work, M13 health logic, documentation, Electron upgrades, and generated Graphify output should remain independently attributable.
 
+## 2026-06-07 — M15 Agent Usage Tracking
+
+### Lessons learned
+- Add new persistent fields as optional (`?`) in both the type and the validator when the field may be absent on already-saved user data. Strict validation of new required fields breaks load for any project saved before the upgrade.
+- The validator's role is to accept structurally valid data, not to backfill defaults. Add defaults in the write path (`createProject`, `logSession`) so the field is always present going forward; tolerate its absence on read.
+- Incrementing a count in an immutable update requires a safe spread: `{ ...(p.agentUsageCounts ?? {}), [agent]: ((p.agentUsageCounts ?? {})[agent] ?? 0) + 1 }` — handles both the undefined-field case and missing keys.
+- Seed data should reflect the actual state of the seed project. The D.AI.L.Y seed has one logged session by Claude Code, so `agentUsageCounts: { 'Claude Code': 1 }` is correct rather than `{}`.
+
+### M15 results
+- `agentUsageCounts` field added as optional to `Project` type and validated correctly in `isProject`.
+- `createProject` initializes the field to `{}`; `logSession` increments the correct agent's count.
+- "Agent usage" section appears in Overview, sorted by count, hidden when empty.
+- Existing saved data without the field continues to load and pass validation.
+- Type check and production build both pass.
+
+## 2026-06-07 — M14 Export Project Summary
+
+### Lessons learned
+- Native Electron save dialogs require `dialog` from the main process — `dialog.showSaveDialog` returns `{ canceled, filePath }`. Always guard both `canceled` and `filePath` before writing.
+- `BrowserWindow.getFocusedWindow()` can return null if focus moved; fall back to `getAllWindows()[0]` so the dialog always has an owner window.
+- Export feedback works without a modal: set a transient string state (`'idle' | 'saved' | 'cancelled'`) on the triggering button, then reset after 2 seconds — same pattern as the PromptCard copy button.
+- Keep `generateSummary` and `generatePrompt` as separate functions. The prompt is optimized for AI context (omits complete tasks, active-only); the summary is archival (includes everything). They serve different audiences and should not be merged.
+- File export must include all tasks (including complete ones) because the export is an archival snapshot, not a working context document.
+
+### M14 results
+- `generateSummary(project)` is a pure Markdown generator covering all project fields.
+- `file:export` IPC handler opens a native save dialog, writes the file, and returns a boolean result to the renderer.
+- `exportFile` is exposed through the preload bridge and typed in `env.d.ts`.
+- "Export summary" button shows transient "Saved!" or "Cancelled" feedback for 2 seconds after the dialog resolves.
+- No new modal, no new component, no new dependencies.
+
 ### M11–M13 results
 - M11 session logging matches `LastSession`, updates projects immutably, defaults new logs correctly, and persists through an Electron restart.
 - M12 prompt generation is pure, omits empty fields, orders rules by severity, copies the complete prompt, and closes through Escape or the close button.

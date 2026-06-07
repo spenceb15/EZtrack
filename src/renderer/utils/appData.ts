@@ -92,7 +92,10 @@ function isProject(value: unknown): value is Project {
     Array.isArray(value.doNotChangeRules) &&
     value.doNotChangeRules.every(isRule) &&
     (value.lastSession === null || isLastSession(value.lastSession)) &&
-    typeof value.notes === 'string'
+    typeof value.notes === 'string' &&
+    (value.agentUsageCounts === undefined ||
+      (isRecord(value.agentUsageCounts) &&
+        Object.values(value.agentUsageCounts).every((v) => typeof v === 'number')))
   )
 }
 

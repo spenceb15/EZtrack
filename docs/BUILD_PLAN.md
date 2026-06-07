@@ -1594,6 +1594,77 @@ Required output:
 
 ---
 
+# 17.7. Milestone 14 — Export Project Summary
+
+## Goal
+
+Let the user export a complete Markdown snapshot of any project to a local file — useful for archiving, sharing context with an agent outside the app, or reviewing project state in a text editor.
+
+## Build
+
+* "Export summary" button on Project Detail page
+* `generateSummary(project)` utility — pure function in `utils/summary.ts`, no side effects
+* `file:export` IPC handler in `main/index.ts` — opens native save dialog, writes `.md` file
+* `exportFile` bridge in `preload/index.ts` and `env.d.ts`
+* Transient "Saved!" / "Cancelled" button feedback (2 seconds), same pattern as PromptCard copy button
+
+## Summary format (Markdown)
+
+Includes: name, type, phase, progress, health, last worked on, last agent used, description, current goal, recommended next step + agent + why, **all** tasks (including complete), Do Not Change rules, last session, notes.
+
+## Do Not Build
+
+* Scheduled or automatic exports
+* Export history or versioning
+* PDF or HTML export variants
+* Cloud upload or sharing
+* Handoffs, pipelines, or automation
+
+## Acceptance Criteria
+
+* User clicks "Export summary" on a project detail page.
+* Native macOS save dialog opens with a pre-suggested filename (`<project-name>-summary.md`).
+* User selects a path and saves; button briefly shows "Saved!".
+* User cancels dialog; button briefly shows "Cancelled".
+* The written `.md` file contains all non-empty project fields in readable Markdown.
+* Cancelling does not write any file.
+* No new modal is required — the native dialog is the UI.
+
+---
+
+# 17.8. Milestone 15 — Agent Usage Tracking
+
+## Goal
+
+Show how many sessions each agent has been used for on a project, so the user can see which tools they actually reach for versus which ones are merely recommended.
+
+## Build
+
+* `agentUsageCounts?: Record<string, number>` on the `Project` type (optional for backward compat with existing saved data)
+* `isProject` validator accepts the field as optional — missing means no counts yet, present must be `Record<string, number>`
+* `createProject` initializes `agentUsageCounts: {}`
+* `logSession` increments `agentUsageCounts[agent]` each time a session is saved
+* "Agent usage" display in the Project Detail Overview section — sorted by count descending, hidden when empty
+
+## Do Not Build
+
+* Automatic session/agent detection
+* Global agent usage leaderboard or cross-project view
+* Usage charts or visualizations
+* Usage-based recommendation adjustments
+* New dependencies
+
+## Acceptance Criteria
+
+* Logging a session increments the count for the logged agent.
+* Counts persist across Electron restarts.
+* "Agent usage" appears in Overview only when at least one session has been logged.
+* Agents sorted by session count (most-used first).
+* New projects start with an empty counts map.
+* Existing saved data without `agentUsageCounts` loads and passes validation without error.
+
+---
+
 # 18. Future Build Order After MVP
 
 After the MVP dashboard works, build future features in this order.

@@ -22,6 +22,7 @@ import { SessionForm, type SessionFormValues } from '../components/SessionForm'
 import { PromptCard } from '../components/PromptCard'
 import { recommendForProject } from '../utils/nextStep'
 import { generatePrompt } from '../utils/prompt'
+import { generateSummary } from '../utils/summary'
 
 export function ProjectDetail({
   project,
@@ -51,6 +52,7 @@ export function ProjectDetail({
   const [addingRule, setAddingRule] = useState(false)
   const [loggingSession, setLoggingSession] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
+  const [exportStatus, setExportStatus] = useState<'idle' | 'saved' | 'cancelled' | 'failed'>('idle')
 
   if (!project) {
     return (
@@ -65,6 +67,20 @@ export function ProjectDetail({
 
   const closeTask = () => setTaskModal(null)
   const health = computeHealth(project)
+
+  const exportSummary = () => {
+    const filename = `${project.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-summary.md`
+    void window.api
+      .exportFile(generateSummary(project), filename)
+      .then((saved) => {
+        setExportStatus(saved ? 'saved' : 'cancelled')
+        setTimeout(() => setExportStatus('idle'), 2000)
+      })
+      .catch(() => {
+        setExportStatus('failed')
+        setTimeout(() => setExportStatus('idle'), 3000)
+      })
+  }
 
   return (
     <div className="page">
@@ -84,6 +100,15 @@ export function ProjectDetail({
           </button>
           <button className="btn btn-ghost" onClick={() => setPromptOpen(true)}>
             Generate prompt
+          </button>
+          <button className="btn btn-ghost" onClick={exportSummary}>
+            {exportStatus === 'saved'
+              ? 'Saved!'
+              : exportStatus === 'cancelled'
+                ? 'Cancelled'
+                : exportStatus === 'failed'
+                  ? 'Export failed'
+                  : 'Export summary'}
           </button>
           <button className="btn btn-ghost" onClick={() => setLoggingSession(true)}>
             Log session
@@ -124,6 +149,20 @@ export function ProjectDetail({
             ))}
           </ul>
         </div>
+        {Object.keys(project.agentUsageCounts ?? {}).length > 0 && (
+          <div className="field">
+            <span className="field-label">Agent usage</span>
+            <ul className="bullet-list">
+              {Object.entries(project.agentUsageCounts ?? {})
+                .sort(([, a], [, b]) => b - a)
+                .map(([agent, count]) => (
+                  <li key={agent}>
+                    {agent}: {count} {count === 1 ? 'session' : 'sessions'}
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
       </Section>
 
       <Section title="Current goal">

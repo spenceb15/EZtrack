@@ -145,7 +145,8 @@ export const seedData: AppData = {
         recommendedNextStep:
           'Use Codex to remove the Byte box without redesigning the mascot or changing glow rings.'
       },
-      notes: 'Preserve local-first architecture. Keep lesson logic stable.'
+      notes: 'Preserve local-first architecture. Keep lesson logic stable.',
+      agentUsageCounts: { 'Claude Code': 1 }
     }
   ]
 }

@@ -56,6 +56,7 @@ export interface Project {
   doNotChangeRules: DoNotChangeRule[]
   lastSession: LastSession | null
   notes: string
+  agentUsageCounts?: Record<string, number>
 }
 
 export interface Agent {

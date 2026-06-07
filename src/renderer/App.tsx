@@ -97,7 +97,8 @@ export function App() {
       lastWorkedOn: today(),
       tasks: [],
       doNotChangeRules: [],
-      lastSession: null
+      lastSession: null,
+      agentUsageCounts: {}
     }
     persist({ ...current, projects: [...current.projects, project] })
     setSelectedProjectId(project.id)
@@ -186,6 +187,10 @@ export function App() {
                 summary: values.summary,
                 problems: values.problems,
                 recommendedNextStep: values.recommendedNextStep
+              },
+              agentUsageCounts: {
+                ...(p.agentUsageCounts ?? {}),
+                [values.agent]: ((p.agentUsageCounts ?? {})[values.agent] ?? 0) + 1
               }
             }
           : p

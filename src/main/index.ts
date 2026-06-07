@@ -1,5 +1,5 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
-import { join } from 'path'
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
+import { basename, join } from 'path'
 
 // Prevent Chromium from prompting for macOS Keychain access.
 // This app stores nothing sensitive — session data doesn't need OS-level encryption.
@@ -37,10 +37,27 @@ async function saveData(data: unknown): Promise<boolean> {
   }
 }
 
+async function exportFile(content: string, defaultName: string): Promise<boolean> {
+  const win = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
+  const result = await dialog.showSaveDialog(win, {
+    // basename strips any path components so the renderer can't steer the
+    // default location outside the home folder (defense-in-depth; the user
+    // still confirms the final path in the dialog).
+    defaultPath: join(homedir(), basename(defaultName)),
+    filters: [{ name: 'Markdown', extensions: ['md'] }]
+  })
+  if (result.canceled || !result.filePath) return false
+  await fs.writeFile(result.filePath, content, 'utf-8')
+  return true
+}
+
 function registerIpc(): void {
   ipcMain.handle('data:load', () => loadData())
   ipcMain.handle('data:save', (_event, data: unknown) => saveData(data))
   ipcMain.handle('data:path', () => DATA_FILE)
+  ipcMain.handle('file:export', (_event, { content, defaultName }: { content: string; defaultName: string }) =>
+    exportFile(content, defaultName)
+  )
 }
 
 function createWindow(): void {

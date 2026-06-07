@@ -9,6 +9,7 @@ declare global {
       loadData: () => Promise<unknown | null>
       saveData: (data: AppData) => Promise<boolean>
       dataPath: () => Promise<string>
+      exportFile: (content: string, defaultName: string) => Promise<boolean>
     }
   }
 }
