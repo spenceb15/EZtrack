@@ -42,3 +42,26 @@
 - Rule editing/deletion remains out of scope because the MVP acceptance criterion requires adding and viewing rules, not full rule management.
 - Exposed the existing stored `health === 'Blocked'` override as one project-form checkbox; clearing it returns health to derived logic without changing the schema.
 - Keep isolated smoke scripts and screenshots in `/tmp`; do not add test artifacts or dependencies to the repository.
+
+## 2026-06-07 — M10 D.A.I.L.Y real-world test
+
+### Lessons learned
+- Verify recommendation transitions with controls scoped to the named task. An unscoped `Complete` lookup can click the wrong repeated button and produce a false-positive workflow result.
+- A persistence test must inspect the specific edited fields and object identities after a full process termination and restart, not merely confirm that the project name renders.
+- Compare sample-data reset against the exact seed shape: project count, task IDs/statuses, rule count, and default agents. A visible D.A.I.L.Y card alone does not prove a complete reset.
+- Review runtime dependencies as part of Electron security. Secure `BrowserWindow` preferences do not compensate for an Electron release with known high-severity advisories.
+- Major Electron upgrades can trigger macOS Keychain prompts through Chromium Safe Storage even when the application has no credential or keychain code. Treat runtime upgrades as user-visible changes and do not launch them without explicit approval.
+- Keep test artifacts inside the active project workspace unless the user explicitly authorizes another location. Do not use temporary profiles, scripts, or screenshots outside the workspace by default.
+
+### M10 results
+- D.A.I.L.Y answered all seven real-world workflow questions on the project detail screen.
+- The initial recommendation selected the lesson-completion smoke test and advanced to the Byte box fix after the smoke-test task was completed.
+- Project, task, and Do Not Change rule updates used immutable replacements and generated unique IDs.
+- Local JSON changes survived an actual Electron termination and restart.
+- Sample-data reset restored the D.A.I.L.Y seed project, three starter tasks, five rules, and four default agents.
+- Type checking, production build, whitespace checks, routing, launch, minimum-window layout, and renderer console checks passed.
+
+### Review decisions
+- No product feature or architecture changes were needed for M10.
+- Remove accidental workspace data artifacts instead of committing runtime-generated JSON.
+- Keep dependency-toolchain upgrades separate from milestone documentation when the worktree contains both.
