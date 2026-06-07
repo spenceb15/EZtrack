@@ -1,0 +1,202 @@
+{
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/electron.vite.config.ts": {
+    "mtime": 1780814421.7754512,
+    "ast_hash": "9f60075f58f7e80a5103d34decd894b3",
+    "semantic_hash": "9f60075f58f7e80a5103d34decd894b3"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/package.json": {
+    "mtime": 1780849011.6143339,
+    "ast_hash": "794a59de3b1946a2c7d5baf029db84c4",
+    "semantic_hash": "794a59de3b1946a2c7d5baf029db84c4"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/main/index.ts": {
+    "mtime": 1780850374.4546735,
+    "ast_hash": "874ba4559df3802428e96bd36a81277a",
+    "semantic_hash": "874ba4559df3802428e96bd36a81277a"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/preload/index.ts": {
+    "mtime": 1780815531.300055,
+    "ast_hash": "6aca625839584bb31b6af138aedfad00",
+    "semantic_hash": "6aca625839584bb31b6af138aedfad00"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/App.tsx": {
+    "mtime": 1780849574.1730604,
+    "ast_hash": "1d4d94e7d2ca18a6f7c3db4928ea7a27",
+    "semantic_hash": "1d4d94e7d2ca18a6f7c3db4928ea7a27"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/Modal.tsx": {
+    "mtime": 1780815973.9819975,
+    "ast_hash": "14c93f8375827d84774364796dc697af",
+    "semantic_hash": "14c93f8375827d84774364796dc697af"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/ProjectCard.tsx": {
+    "mtime": 1780817813.7797427,
+    "ast_hash": "ae253caa28e25ef24e33bb23c99a7dd3",
+    "semantic_hash": "ae253caa28e25ef24e33bb23c99a7dd3"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/ProjectForm.tsx": {
+    "mtime": 1780818685.0175674,
+    "ast_hash": "627f340b89da7707eb896032c21d8b2b",
+    "semantic_hash": "627f340b89da7707eb896032c21d8b2b"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/PromptCard.tsx": {
+    "mtime": 1780850991.9003618,
+    "ast_hash": "c4460f5361b0ac55de10e0f3ddd24a78",
+    "semantic_hash": "c4460f5361b0ac55de10e0f3ddd24a78"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/RecommendationCard.tsx": {
+    "mtime": 1780818594.653299,
+    "ast_hash": "eff461686a34ff696064010f04154dc6",
+    "semantic_hash": "eff461686a34ff696064010f04154dc6"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/RuleForm.tsx": {
+    "mtime": 1780818234.4013138,
+    "ast_hash": "ed54c5ef7d7692bba8c53d351a52b67c",
+    "semantic_hash": "ed54c5ef7d7692bba8c53d351a52b67c"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/SessionForm.tsx": {
+    "mtime": 1780850145.4762692,
+    "ast_hash": "d725ad4bc34250633a9640d14008552e",
+    "semantic_hash": "d725ad4bc34250633a9640d14008552e"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/Sidebar.tsx": {
+    "mtime": 1780814488.1369898,
+    "ast_hash": "cf751ab1ecfd01bc9e3798d4d0008bce",
+    "semantic_hash": "cf751ab1ecfd01bc9e3798d4d0008bce"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/TaskForm.tsx": {
+    "mtime": 1780816762.2748003,
+    "ast_hash": "47cea757083644850ffe0fff44d12750",
+    "semantic_hash": "47cea757083644850ffe0fff44d12750"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/components/ui.tsx": {
+    "mtime": 1780814495.712656,
+    "ast_hash": "3d2a3c6a1b03bdb67beb7768d6ffcc72",
+    "semantic_hash": "3d2a3c6a1b03bdb67beb7768d6ffcc72"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/data/options.ts": {
+    "mtime": 1780815971.3806775,
+    "ast_hash": "2187ab32ad5e500a0aa880623038854d",
+    "semantic_hash": "2187ab32ad5e500a0aa880623038854d"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/data/seed.ts": {
+    "mtime": 1780815531.5435755,
+    "ast_hash": "eaa3296ad13c66d216b80976ad96fcd5",
+    "semantic_hash": "eaa3296ad13c66d216b80976ad96fcd5"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/env.d.ts": {
+    "mtime": 1780815531.4300244,
+    "ast_hash": "99399d1f1a1b2e8a1fc06abe1f56eb3e",
+    "semantic_hash": "99399d1f1a1b2e8a1fc06abe1f56eb3e"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/main.tsx": {
+    "mtime": 1780814475.2141206,
+    "ast_hash": "49a774bba59bee4e83e06342941cb072",
+    "semantic_hash": "49a774bba59bee4e83e06342941cb072"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/pages/Agents.tsx": {
+    "mtime": 1780814568.017927,
+    "ast_hash": "55267c44648bd90aba841b0aade1bb97",
+    "semantic_hash": "55267c44648bd90aba841b0aade1bb97"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/pages/Dashboard.tsx": {
+    "mtime": 1780817125.0580606,
+    "ast_hash": "a584214b739a8a1a2a307181bab9b628",
+    "semantic_hash": "a584214b739a8a1a2a307181bab9b628"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/pages/ProjectDetail.tsx": {
+    "mtime": 1780850128.1996758,
+    "ast_hash": "bec924f8ea206c786ef257aebade09ed",
+    "semantic_hash": "bec924f8ea206c786ef257aebade09ed"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/pages/Projects.tsx": {
+    "mtime": 1780817951.7406998,
+    "ast_hash": "a03d7cccbb2eba6392aff2b2f86716b8",
+    "semantic_hash": "a03d7cccbb2eba6392aff2b2f86716b8"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/pages/Settings.tsx": {
+    "mtime": 1780815081.3962717,
+    "ast_hash": "80b44afc7dce0e9a45fe0f20f095d60e",
+    "semantic_hash": "80b44afc7dce0e9a45fe0f20f095d60e"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/types/index.ts": {
+    "mtime": 1780814445.433895,
+    "ast_hash": "d8115e5df2cdef6828caa4719b96e813",
+    "semantic_hash": "d8115e5df2cdef6828caa4719b96e813"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/appData.ts": {
+    "mtime": 1780815531.0332875,
+    "ast_hash": "4b967fd88af57f9b0c836dad17efd461",
+    "semantic_hash": "4b967fd88af57f9b0c836dad17efd461"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/health.ts": {
+    "mtime": 1780850869.4034116,
+    "ast_hash": "ed8ff0868872c681766bcf09d540bee2",
+    "semantic_hash": "ed8ff0868872c681766bcf09d540bee2"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/id.ts": {
+    "mtime": 1780815971.340667,
+    "ast_hash": "95960d4d1ae1ffe7a59b238ce27bc703",
+    "semantic_hash": "95960d4d1ae1ffe7a59b238ce27bc703"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/nextStep.ts": {
+    "mtime": 1780817098.2613673,
+    "ast_hash": "cbbb94364bf61971687a924b2daa4c37",
+    "semantic_hash": "cbbb94364bf61971687a924b2daa4c37"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/projects.ts": {
+    "mtime": 1780814447.9906397,
+    "ast_hash": "c968a81caad66e91f983067ef2bde342",
+    "semantic_hash": "c968a81caad66e91f983067ef2bde342"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/prompt.ts": {
+    "mtime": 1780850735.4242377,
+    "ast_hash": "787bb5e5a918998e7fc41a68dbbe3ba7",
+    "semantic_hash": "787bb5e5a918998e7fc41a68dbbe3ba7"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/utils/recommend.ts": {
+    "mtime": 1780817102.371873,
+    "ast_hash": "a7497115ceeadaebbdf9952097a43652",
+    "semantic_hash": "a7497115ceeadaebbdf9952097a43652"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/tsconfig.json": {
+    "mtime": 1780814425.9234655,
+    "ast_hash": "0238022817eebd93f6b63d88bf15ad73",
+    "semantic_hash": "0238022817eebd93f6b63d88bf15ad73"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/AGENT_RULES.md": {
+    "mtime": 1780849508.871023,
+    "ast_hash": "0cf81a3036d644005593d7eaf80c9caf",
+    "semantic_hash": "0cf81a3036d644005593d7eaf80c9caf"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/README.md": {
+    "mtime": 1780813734.5252526,
+    "ast_hash": "5cf227bf0dbe481f3c6667a645973623",
+    "semantic_hash": "5cf227bf0dbe481f3c6667a645973623"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/docs/BUILD_PLAN.md": {
+    "mtime": 1780850849.2939277,
+    "ast_hash": "d1de61699da75fd451ed5659bbc1b6a7",
+    "semantic_hash": "d1de61699da75fd451ed5659bbc1b6a7"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/docs/FULL_PRD.md": {
+    "mtime": 1780813557.646775,
+    "ast_hash": "74e5db3b49770d1ded560e60afadd775",
+    "semantic_hash": "74e5db3b49770d1ded560e60afadd775"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/docs/MVP_SPEC.md": {
+    "mtime": 1780813484.1876588,
+    "ast_hash": "bda13472986c72a4cd33363673b74fce",
+    "semantic_hash": "bda13472986c72a4cd33363673b74fce"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/docs/lessons-learned.md": {
+    "mtime": 1780849307.850405,
+    "ast_hash": "a13a825b2b71d0507e9c85837772665d",
+    "semantic_hash": "a13a825b2b71d0507e9c85837772665d"
+  },
+  "/Users/spencerbrown/Desktop/Projects/EZTrack/src/renderer/index.html": {
+    "mtime": 1780814473.380598,
+    "ast_hash": "3bf250d8bfe1274f228037fdef487b8a",
+    "semantic_hash": "3bf250d8bfe1274f228037fdef487b8a"
+  }
+}
