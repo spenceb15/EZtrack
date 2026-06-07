@@ -13,6 +13,7 @@ export interface ProjectFormValues {
   recommendedAgent: AgentName
   whyThisAgent: string
   notes: string
+  manuallyBlocked: boolean
 }
 
 export function ProjectForm({
@@ -36,7 +37,8 @@ export function ProjectForm({
     nextStep: initial?.nextStep ?? '',
     recommendedAgent: initial?.recommendedAgent ?? agents[0]?.name ?? 'Claude Code',
     whyThisAgent: initial?.whyThisAgent ?? '',
-    notes: initial?.notes ?? ''
+    notes: initial?.notes ?? '',
+    manuallyBlocked: initial?.health === 'Blocked'
   })
 
   function set<K extends keyof ProjectFormValues>(key: K, val: ProjectFormValues[K]) {
@@ -148,6 +150,15 @@ export function ProjectForm({
           onChange={(e) => set('notes', e.target.value)}
           rows={2}
         />
+      </label>
+
+      <label className="checkbox-field">
+        <input
+          type="checkbox"
+          checked={values.manuallyBlocked}
+          onChange={(e) => set('manuallyBlocked', e.target.checked)}
+        />
+        <span>Mark project blocked</span>
       </label>
 
       <div className="form-actions">

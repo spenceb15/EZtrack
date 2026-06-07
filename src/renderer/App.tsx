@@ -6,11 +6,12 @@ import { ProjectDetail } from './pages/ProjectDetail'
 import { Agents } from './pages/Agents'
 import { Settings } from './pages/Settings'
 import { seedData } from './data/seed'
-import type { AppData, NavKey, Project, Task, TaskStatus } from './types'
+import type { AppData, DoNotChangeRule, NavKey, Project, Task, TaskStatus } from './types'
 import { isAppData } from './utils/appData'
 import { makeId, today } from './utils/id'
 import type { ProjectFormValues } from './components/ProjectForm'
 import type { TaskFormValues } from './components/TaskForm'
+import type { RuleFormValues } from './components/RuleForm'
 
 export function App() {
   const [nav, setNav] = useState<NavKey>('dashboard')
@@ -86,10 +87,11 @@ export function App() {
   const createProject = (values: ProjectFormValues) => {
     const current = dataRef.current
     if (!current) return
+    const { manuallyBlocked, ...projectValues } = values
     const project: Project = {
       id: makeId('project'),
-      ...values,
-      health: 'Needs Attention',
+      ...projectValues,
+      health: manuallyBlocked ? 'Blocked' : 'Needs Attention',
       lastAgentUsed: '',
       lastWorkedOn: today(),
       tasks: [],
@@ -104,9 +106,19 @@ export function App() {
   const updateProject = (id: string, values: ProjectFormValues) => {
     const current = dataRef.current
     if (!current) return
+    const { manuallyBlocked, ...projectValues } = values
     persist({
       ...current,
-      projects: current.projects.map((p) => (p.id === id ? { ...p, ...values } : p))
+      projects: current.projects.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              ...projectValues,
+              health: manuallyBlocked ? 'Blocked' : 'Needs Attention',
+              lastWorkedOn: today()
+            }
+          : p
+      )
     })
   }
 
@@ -117,7 +129,7 @@ export function App() {
     persist({
       ...current,
       projects: current.projects.map((p) =>
-        p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p
+        p.id === projectId ? { ...p, lastWorkedOn: today(), tasks: [...p.tasks, task] } : p
       )
     })
   }
@@ -129,7 +141,11 @@ export function App() {
       ...current,
       projects: current.projects.map((p) =>
         p.id === projectId
-          ? { ...p, tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, ...values } : t)) }
+          ? {
+              ...p,
+              lastWorkedOn: today(),
+              tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, ...values } : t))
+            }
           : p
       )
     })
@@ -142,8 +158,34 @@ export function App() {
       ...current,
       projects: current.projects.map((p) =>
         p.id === projectId
-          ? { ...p, tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, status } : t)) }
+          ? {
+              ...p,
+              lastWorkedOn: today(),
+              tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, status } : t))
+            }
           : p
+      )
+    })
+  }
+
+  const addRule = (projectId: string, values: RuleFormValues) => {
+    const current = dataRef.current
+    if (!current) return
+    const rule: DoNotChangeRule = {
+      id: makeId('rule'),
+      ...values,
+      createdAt: today()
+    }
+    persist({
+      ...current,
+      projects: current.projects.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              lastWorkedOn: today(),
+              doNotChangeRules: [...project.doNotChangeRules, rule]
+            }
+          : project
       )
     })
   }
@@ -200,6 +242,7 @@ export function App() {
             onAddTask={addTask}
             onUpdateTask={updateTask}
             onSetTaskStatus={setTaskStatus}
+            onAddRule={addRule}
           />
         )}
         {nav === 'agents' && <Agents agents={data.agents} />}

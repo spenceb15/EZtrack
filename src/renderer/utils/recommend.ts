@@ -10,41 +10,111 @@ export interface AgentSuggestion {
   why: string
 }
 
-// Ordered rules — first keyword match wins.
-// Codex is checked first (safest, minimal-diff work), Claude Code last
-// because its keywords ("ui", "add") are the broadest and most generic.
+// Ordered rules — first keyword match wins. Correctness work takes precedence,
+// followed by explicit review, planning, and general implementation work.
 const RULES: { agent: AgentName; why: string; keywords: string[] }[] = [
   {
     agent: 'Codex',
     why: 'Testing or bug-fix work — Codex is best for regression checks and minimal, correct diffs.',
     keywords: [
       'test',
+      'tests',
+      'testing',
       'bug',
+      'bugs',
       'fix',
+      'fixes',
+      'fixed',
+      'fixing',
       'regression',
+      'regressions',
       'error',
+      'errors',
       'typescript',
       'crash',
+      'crashes',
       'broken',
-      'smoke',
+      'smoke test',
+      'smoke tests',
       'debug',
-      'lint'
+      'debugging',
+      'lint',
+      'linting'
     ]
   },
   {
     agent: 'Gemini',
     why: 'Review or UX work — Gemini is best for critique, design feedback, and spotting requirement gaps.',
-    keywords: ['ux', 'review', 'critique', 'visual', 'usability', 'feedback', 'evaluate', 'audit']
+    keywords: [
+      'ux review',
+      'user experience review',
+      'review',
+      'reviews',
+      'reviewing',
+      'critique',
+      'critiques',
+      'critiquing',
+      'visual review',
+      'visual critique',
+      'usability review',
+      'design feedback',
+      'evaluate',
+      'evaluates',
+      'evaluating',
+      'evaluation',
+      'audit',
+      'audits',
+      'auditing',
+      'requirement gap',
+      'requirement gaps'
+    ]
   },
   {
     agent: 'ChatGPT',
     why: 'Planning or spec work — ChatGPT is best for planning, PRDs, specs, and architecture reasoning.',
-    keywords: ['plan', 'prd', 'spec', 'strategy', 'architecture', 'document', 'docs', 'research', 'outline', 'roadmap']
+    keywords: [
+      'plan',
+      'plans',
+      'planning',
+      'prd',
+      'prds',
+      'spec',
+      'specs',
+      'specification',
+      'specifications',
+      'strategy',
+      'architecture',
+      'document',
+      'documentation',
+      'docs',
+      'research',
+      'outline',
+      'roadmap',
+      'prompt',
+      'prompts'
+    ]
   },
   {
     agent: 'Claude Code',
     why: 'Feature or build work — Claude Code is best for implementing and modifying app features.',
-    keywords: ['build', 'implement', 'feature', 'component', 'refactor', 'screen', 'integrate', 'ui']
+    keywords: [
+      'build',
+      'building',
+      'implement',
+      'implementing',
+      'implementation',
+      'feature',
+      'features',
+      'component',
+      'components',
+      'refactor',
+      'refactoring',
+      'screen',
+      'screens',
+      'integrate',
+      'integration',
+      'ui'
+    ]
   }
 ]
 
@@ -54,11 +124,16 @@ const DEFAULT: AgentSuggestion = {
 }
 
 export function suggestAgent(input: { title: string; description?: string }): AgentSuggestion {
-  const text = `${input.title} ${input.description ?? ''}`.toLowerCase()
+  const text = ` ${`${input.title} ${input.description ?? ''}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()} `
+
   for (const rule of RULES) {
-    if (rule.keywords.some((k) => text.includes(k))) {
+    if (rule.keywords.some((keyword) => text.includes(` ${keyword} `))) {
       return { agent: rule.agent, why: rule.why }
     }
   }
-  return DEFAULT
+
+  return { ...DEFAULT }
 }

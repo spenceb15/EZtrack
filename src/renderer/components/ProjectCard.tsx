@@ -1,5 +1,6 @@
 import type { Project } from '../types'
 import { openTaskCount, blockedTaskCount, formatDate } from '../utils/projects'
+import { computeHealth } from '../utils/health'
 import { ProgressBar, PhaseBadge, HealthBadge, AgentBadge } from './ui'
 
 export function ProjectCard({
@@ -10,12 +11,13 @@ export function ProjectCard({
   onOpen: (id: string) => void
 }) {
   const blocked = blockedTaskCount(project)
+  const health = computeHealth(project)
 
   return (
     <article className="card project-card">
       <header className="project-card-head">
         <h3 className="project-name">{project.name}</h3>
-        <HealthBadge health={project.health} />
+        <HealthBadge health={health.health} />
       </header>
 
       <p className="project-desc">{project.description}</p>

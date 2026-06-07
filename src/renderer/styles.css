@@ -337,6 +337,35 @@ body {
   font-size: 12px;
 }
 
+/* ---------- Recommendation card ---------- */
+.rec-card {
+  border-left: 3px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.rec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rec-title {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.rec-cautions {
+  margin-top: 4px;
+}
+
+.rec-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* ---------- Progress ---------- */
 .progress {
   height: 8px;
@@ -587,6 +616,11 @@ body {
   margin: 2px 0;
 }
 
+.health-reasons {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
 /* ---------- Settings ---------- */
 .select {
   background: var(--bg);
@@ -726,6 +760,13 @@ body {
 
 .form-row .form-field.grow {
   flex: 2;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
 }
 
 .input,

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Agent, Project } from '../types'
 import { PhaseBadge, HealthBadge, EmptyState } from '../components/ui'
 import { openTaskCount, formatDate } from '../utils/projects'
+import { computeHealth } from '../utils/health'
 import { Modal } from '../components/Modal'
 import { ProjectForm, type ProjectFormValues } from '../components/ProjectForm'
 
@@ -44,7 +45,7 @@ export function Projects({
               <div className="project-row-main">
                 <div className="project-row-title">
                   <span className="project-name">{p.name}</span>
-                  <HealthBadge health={p.health} />
+                  <HealthBadge health={computeHealth(p).health} />
                   <PhaseBadge phase={p.phase} />
                 </div>
                 <p className="project-desc">{p.description}</p>

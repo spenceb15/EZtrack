@@ -12,9 +12,13 @@ import {
   EmptyState
 } from '../components/ui'
 import { formatDate } from '../utils/projects'
+import { computeHealth } from '../utils/health'
 import { Modal } from '../components/Modal'
 import { ProjectForm, type ProjectFormValues } from '../components/ProjectForm'
 import { TaskForm, type TaskFormValues } from '../components/TaskForm'
+import { RuleForm, type RuleFormValues } from '../components/RuleForm'
+import { RecommendationCard } from '../components/RecommendationCard'
+import { recommendForProject } from '../utils/nextStep'
 
 export function ProjectDetail({
   project,
@@ -23,7 +27,8 @@ export function ProjectDetail({
   onUpdateProject,
   onAddTask,
   onUpdateTask,
-  onSetTaskStatus
+  onSetTaskStatus,
+  onAddRule
 }: {
   project: Project | null
   agents: Agent[]
@@ -32,10 +37,13 @@ export function ProjectDetail({
   onAddTask: (projectId: string, values: TaskFormValues) => void
   onUpdateTask: (projectId: string, taskId: string, values: TaskFormValues) => void
   onSetTaskStatus: (projectId: string, taskId: string, status: Task['status']) => void
+  onAddRule: (projectId: string, values: RuleFormValues) => void
 }) {
   const [editingProject, setEditingProject] = useState(false)
   // null = closed; { task: null } = add; { task } = edit
   const [taskModal, setTaskModal] = useState<{ task: Task | null } | null>(null)
+  const [showRec, setShowRec] = useState(false)
+  const [addingRule, setAddingRule] = useState(false)
 
   if (!project) {
     return (
@@ -49,6 +57,7 @@ export function ProjectDetail({
   }
 
   const closeTask = () => setTaskModal(null)
+  const health = computeHealth(project)
 
   return (
     <div className="page">
@@ -62,12 +71,17 @@ export function ProjectDetail({
           <p className="page-subtitle">{project.type}</p>
         </div>
         <div className="head-actions">
-          <HealthBadge health={project.health} />
+          <HealthBadge health={health.health} />
+          <button className="btn btn-primary" onClick={() => setShowRec((s) => !s)}>
+            What should I do next?
+          </button>
           <button className="btn btn-ghost" onClick={() => setEditingProject(true)}>
             Edit project
           </button>
         </div>
       </header>
+
+      {showRec && <RecommendationCard rec={recommendForProject(project)} onDismiss={() => setShowRec(false)} />}
 
       <Section title="Overview">
         <p className="field-value">{project.description}</p>
@@ -88,6 +102,14 @@ export function ProjectDetail({
         <div className="field">
           <span className="field-label">Progress · {project.progress}%</span>
           <ProgressBar value={project.progress} />
+        </div>
+        <div className="field">
+          <span className="field-label">Health · {health.health}</span>
+          <ul className="bullet-list health-reasons">
+            {health.reasons.map((r, i) => (
+              <li key={i}>{r}</li>
+            ))}
+          </ul>
         </div>
       </Section>
 
@@ -164,8 +186,13 @@ export function ProjectDetail({
       </Section>
 
       <Section title="Do Not Change rules">
+        <div className="section-actions">
+          <button className="btn btn-primary btn-sm" onClick={() => setAddingRule(true)}>
+            Add rule
+          </button>
+        </div>
         {project.doNotChangeRules.length === 0 ? (
-          <EmptyState message="No rules yet." />
+          <EmptyState message="No rules yet. Click “Add rule” to create one." />
         ) : (
           <ul className="rule-list">
             {project.doNotChangeRules.map((r) => (
@@ -242,6 +269,18 @@ export function ProjectDetail({
               closeTask()
             }}
             onCancel={closeTask}
+          />
+        </Modal>
+      )}
+
+      {addingRule && (
+        <Modal title="Add Do Not Change rule" onClose={() => setAddingRule(false)}>
+          <RuleForm
+            onSubmit={(values) => {
+              onAddRule(project.id, values)
+              setAddingRule(false)
+            }}
+            onCancel={() => setAddingRule(false)}
           />
         </Modal>
       )}
