@@ -1,0 +1,89 @@
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { join } from 'path'
+import { homedir } from 'os'
+import { promises as fs } from 'fs'
+import { randomUUID } from 'crypto'
+
+// Local-first storage: a single JSON file under the user's home folder.
+// Path is fixed in main (never taken from the renderer) so there is no path traversal.
+const DATA_DIR = join(homedir(), 'AIProjectDashboard')
+const DATA_FILE = join(DATA_DIR, 'app-data.json')
+
+async function loadData(): Promise<unknown | null> {
+  try {
+    const raw = await fs.readFile(DATA_FILE, 'utf-8')
+    return JSON.parse(raw)
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw err
+  }
+}
+
+async function saveData(data: unknown): Promise<boolean> {
+  await fs.mkdir(DATA_DIR, { recursive: true })
+  const temporaryFile = `${DATA_FILE}.${randomUUID()}.tmp`
+
+  try {
+    await fs.writeFile(temporaryFile, JSON.stringify(data, null, 2), 'utf-8')
+    await fs.rename(temporaryFile, DATA_FILE)
+    return true
+  } finally {
+    await fs.rm(temporaryFile, { force: true })
+  }
+}
+
+function registerIpc(): void {
+  ipcMain.handle('data:load', () => loadData())
+  ipcMain.handle('data:save', (_event, data: unknown) => saveData(data))
+  ipcMain.handle('data:path', () => DATA_FILE)
+}
+
+function createWindow(): void {
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 832,
+    minWidth: 960,
+    minHeight: 640,
+    show: false,
+    backgroundColor: '#0e1116',
+    title: 'AI Project Dashboard',
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true
+    }
+  })
+
+  win.on('ready-to-show', () => win.show())
+
+  // Open external links in the system browser, never in-app.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    const protocol = new URL(url).protocol
+    if (protocol === 'https:' || protocol === 'http:') {
+      void shell.openExternal(url)
+    }
+    return { action: 'deny' }
+  })
+
+  // electron-vite injects ELECTRON_RENDERER_URL in dev; load the file in prod.
+  if (process.env['ELECTRON_RENDERER_URL']) {
+    win.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  } else {
+    win.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+}
+
+app.whenReady().then(() => {
+  registerIpc()
+  createWindow()
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})
