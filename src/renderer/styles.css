@@ -216,6 +216,14 @@ body {
   gap: 8px;
 }
 
+.project-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
 .project-name {
   font-size: 16px;
   font-weight: 600;
@@ -419,6 +427,12 @@ body {
 .badge-blocked {
   background: rgba(240, 98, 63, 0.14);
   border-color: rgba(240, 98, 63, 0.4);
+  color: #ff8164;
+}
+
+.badge-rule {
+  background: rgba(240, 98, 63, 0.14);
+  border-color: rgba(240, 98, 63, 0.45);
   color: #ff8164;
 }
 

@@ -16,7 +16,14 @@ export function ProjectCard({
   return (
     <article className="card project-card">
       <header className="project-card-head">
-        <h3 className="project-name">{project.name}</h3>
+        <div className="project-card-title">
+          <h3 className="project-name">{project.name}</h3>
+          {project.doNotChangeRules.length > 0 && (
+            <span className="badge badge-rule">
+              {project.doNotChangeRules.length} rule{project.doNotChangeRules.length === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
         <HealthBadge health={health.health} />
       </header>
 

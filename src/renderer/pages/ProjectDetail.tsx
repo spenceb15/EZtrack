@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Agent, Project, Task } from '../types'
+import type { Agent, LastSession, Project, Task } from '../types'
 import {
   ProgressBar,
   PhaseBadge,
@@ -11,7 +11,7 @@ import {
   Section,
   EmptyState
 } from '../components/ui'
-import { formatDate } from '../utils/projects'
+import { formatDate, sortRulesNewestFirst } from '../utils/projects'
 import { computeHealth } from '../utils/health'
 import { Modal } from '../components/Modal'
 import { ProjectForm, type ProjectFormValues } from '../components/ProjectForm'
@@ -21,9 +21,15 @@ import { KnowledgeNoteForm, type KnowledgeNoteFormValues } from '../components/K
 import { RecommendationCard } from '../components/RecommendationCard'
 import { SessionForm, type SessionFormValues } from '../components/SessionForm'
 import { PromptCard } from '../components/PromptCard'
-import { recommendForProject } from '../utils/nextStep'
+import { recommendNextStep } from '../utils/nextStep'
+import { recommendAgent } from '../utils/recommend'
 import { generatePrompt } from '../utils/prompt'
 import { generateSummary } from '../utils/summary'
+
+function mostRecentSession(history: LastSession[] | undefined): LastSession | null {
+  if (!history || history.length === 0) return null
+  return history.reduce((latest, s) => (s.date > latest.date ? s : latest))
+}
 
 export function ProjectDetail({
   project,
@@ -71,6 +77,7 @@ export function ProjectDetail({
 
   const closeTask = () => setTaskModal(null)
   const health = computeHealth(project)
+  const lastSession = mostRecentSession(project.sessionHistory)
 
   const exportSummary = () => {
     const filename = `${project.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-summary.md`
@@ -91,6 +98,13 @@ export function ProjectDetail({
       <button className="btn btn-ghost back-btn" onClick={onBack}>
         ← Back to Projects
       </button>
+
+      {lastSession && (
+        <div className="card last-session-banner">
+          <span className="field-label">Most recent session · {formatDate(lastSession.date)}</span>
+          <p className="field-value">{lastSession.summary}</p>
+        </div>
+      )}
 
       <header className="page-head">
         <div>
@@ -123,7 +137,16 @@ export function ProjectDetail({
         </div>
       </header>
 
-      {showRec && <RecommendationCard rec={recommendForProject(project)} onDismiss={() => setShowRec(false)} />}
+      {showRec && (
+        <RecommendationCard
+          rec={{
+            project,
+            nextStep: recommendNextStep(project),
+            agentRecommendation: recommendAgent(project)
+          }}
+          onDismiss={() => setShowRec(false)}
+        />
+      )}
 
       <Section title="Overview">
         <p className="field-value">{project.description}</p>
@@ -189,7 +212,7 @@ export function ProjectDetail({
           </button>
         </div>
         {project.tasks.length === 0 ? (
-          <EmptyState message="No tasks yet. Click “Add task” to create one." />
+          <EmptyState message={'No tasks yet. Click "Add task" to create one.'} />
         ) : (
           <ul className="task-list">
             {project.tasks.map((t) => {
@@ -248,10 +271,10 @@ export function ProjectDetail({
           </button>
         </div>
         {project.doNotChangeRules.length === 0 ? (
-          <EmptyState message="No rules yet. Click “Add rule” to create one." />
+          <EmptyState message={'No rules yet. Click "Add rule" to create one.'} />
         ) : (
           <ul className="rule-list">
-            {project.doNotChangeRules.map((r) => (
+            {sortRulesNewestFirst(project.doNotChangeRules).map((r) => (
               <li key={r.id} className="rule-item">
                 <SeverityBadge severity={r.severity} />
                 <div>
@@ -357,6 +380,7 @@ export function ProjectDetail({
       {addingRule && (
         <Modal title="Add Do Not Change rule" onClose={() => setAddingRule(false)}>
           <RuleForm
+            requiredText
             onSubmit={(values) => {
               onAddRule(project.id, values)
               setAddingRule(false)

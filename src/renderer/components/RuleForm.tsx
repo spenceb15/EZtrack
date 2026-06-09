@@ -7,21 +7,32 @@ export interface RuleFormValues {
   reason: string
 }
 
+interface RuleFormValidationState {
+  isError: boolean
+}
+
 export function RuleForm({
   onSubmit,
-  onCancel
+  onCancel,
+  requiredText = false,
 }: {
   onSubmit: (values: RuleFormValues) => void
   onCancel: () => void
+  requiredText?: boolean
 }) {
   const [rule, setRule] = useState('')
   const [severity, setSeverity] = useState<RuleSeverity>('Hard Rule')
   const [reason, setReason] = useState('')
+  const [validationState, setValidationState] = useState<RuleFormValidationState>({ isError: false })
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (!rule.trim()) return
+    if (requiredText && !rule.trim()) {
+      setValidationState({ isError: true })
+      return
+    }
     onSubmit({ rule: rule.trim(), severity, reason: reason.trim() })
+    setValidationState({ isError: false })
   }
 
   return (
@@ -33,9 +44,10 @@ export function RuleForm({
           value={rule}
           onChange={(event) => setRule(event.target.value)}
           rows={3}
-          required
+          required={requiredText}
           autoFocus
         />
+        {validationState.isError && <p className="error-message">Rule text is required.</p>}
       </label>
 
       <label className="form-field">

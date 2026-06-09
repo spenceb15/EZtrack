@@ -1,97 +1,70 @@
-import type { AgentName, Project, Task } from '../types'
-import { suggestAgent } from './recommend'
+import type { Priority, Project, Task } from '../types'
 
-// "What should I do next?" — rule-based next-action selector (MVP_SPEC §11.1 + M7).
-// Pure functions, no AI. Picks one project + one task, explains why, names an
-// agent, and surfaces Do Not Change rules as cautions (§11.2 output format).
-
-export interface NextStep {
-  project: Project
-  task: Task | null
-  reason: string
-  agent: AgentName
-  why: string
-  cautions: string[]
+const PRIORITY_WEIGHT: Record<Priority, number> = {
+  Low: 10,
+  Medium: 20,
+  High: 35,
+  Critical: 50
 }
 
-// Lower tier = more urgent. Mirrors the §11.1 priority order.
-interface Pick {
-  task: Task | null
-  tier: number
-  reason: string
+function priorityWeight(task: Task): number {
+  return PRIORITY_WEIGHT[task.priority] + (task.status === 'In Progress' ? 5 : 0)
 }
 
-const isOpen = (t: Task) => t.status !== 'Complete'
-const looksLike = (t: Task, agent: AgentName) =>
-  suggestAgent({ title: t.title, description: t.description }).agent === agent
+function projectScore(project: Project): number {
+  const blocked = project.tasks.filter((task) => task.status === 'Blocked')
+  const actionable = project.tasks.filter((task) => task.status === 'Ready' || task.status === 'In Progress')
+  const topActionable = actionable.reduce((best, task) => Math.max(best, priorityWeight(task)), 0)
+  const recency = Date.parse(`${project.lastWorkedOn}T00:00:00`)
+  const recencyScore = Number.isNaN(recency) ? 0 : Math.floor(recency / 86400000)
 
-// Choose the single best task within one project.
-function pickTask(project: Project): Pick {
-  const tasks = project.tasks
-  if (tasks.length === 0) {
-    return { task: null, tier: 9, reason: 'No tasks yet — create the first task to define the next move.' }
+  let score = topActionable + recencyScore
+  if (project.health === 'Blocked') score += 120
+  score += blocked.filter((task) => task.priority === 'Critical').length * 100
+  score += blocked.length * 40
+  if (project.phase === 'Testing') score += 25
+  if (project.phase === 'Build & Refine') score += 15
+  if (project.lastSession === null) score += 10
+
+  return score
+}
+
+export function pickProjectForNextStep(projects: Project[]): Project | null {
+  if (projects.length === 0) return null
+
+  return projects.reduce((best, project) => {
+    const bestScore = projectScore(best)
+    const projectScoreValue = projectScore(project)
+    if (projectScoreValue !== bestScore) return projectScoreValue > bestScore ? project : best
+    return project.lastWorkedOn > best.lastWorkedOn ? project : best
+  })
+}
+
+export function recommendNextStep(project: Project): string {
+  const openTasks = project.tasks.filter(t => t.status !== 'Complete')
+  const blockedTasks = project.tasks.filter(t => t.status === 'Blocked')
+
+  if (project.phase === 'Planning' && openTasks.length > 0) {
+    return 'Start working on your top priority task'
   }
-  const find = (fn: (t: Task) => boolean) => tasks.find(fn) ?? null
-
-  let t = find((x) => x.status === 'Blocked' && x.priority === 'Critical')
-  if (t) return { task: t, tier: 1, reason: 'A critical task is blocked — unblocking it is the highest priority.' }
-
-  t = find((x) => x.status === 'Ready' && x.priority === 'Critical')
-  if (t) return { task: t, tier: 2, reason: 'A critical task is ready to start.' }
-
-  t = find((x) => x.status === 'Ready' && x.priority === 'High')
-  if (t) return { task: t, tier: 3, reason: 'A high-priority task is ready to start.' }
-
-  t = find((x) => x.status === 'In Progress')
-  if (t) return { task: t, tier: 4, reason: 'A task is already in progress — finish it before starting new work.' }
-
-  // Heuristic (phase-based, since build/UI history is not tracked):
-  if (project.phase === 'Testing' || project.phase === 'Build & Refine') {
-    t = find((x) => isOpen(x) && x.status !== 'Blocked' && looksLike(x, 'Codex'))
-    if (t) return { task: t, tier: 5, reason: `Project is in ${project.phase} — verify recent work with a testing/regression task.` }
+  if (project.phase === 'Planning') {
+    return 'Define the first concrete task needed to move this project forward'
+  }
+  if (project.phase === 'Build & Refine' && blockedTasks.length > 0) {
+    return "Address the blocked task that's holding up progress"
+  }
+  if (project.phase === 'Build & Refine' && openTasks.length > 0) {
+    return 'Move the highest-priority ready task into focused implementation'
+  }
+  if (project.phase === 'Testing') {
+    return 'Begin thorough testing of all features and components'
   }
   if (project.phase === 'UX Review') {
-    t = find((x) => isOpen(x) && x.status !== 'Blocked' && looksLike(x, 'Gemini'))
-    if (t) return { task: t, tier: 6, reason: 'Project is in UX Review — a review/critique task fits the current phase.' }
+    return 'Review the user experience and gather design feedback'
+  }
+  if (project.phase === 'Stable') {
+    return 'Prepare the project for a smooth, successful launch'
   }
 
-  t = find((x) => x.status === 'Ready')
-  if (t) return { task: t, tier: 7, reason: 'Oldest ready task — next in line.' }
-
-  t = find(isOpen)
-  if (t) return { task: t, tier: 8, reason: 'Next open task.' }
-
-  return { task: null, tier: 9, reason: 'All tasks are complete — add a new task or advance the project.' }
-}
-
-function cautionsFor(project: Project): string[] {
-  return project.doNotChangeRules
-    .filter((r) => r.severity === 'Hard Rule' || r.severity === 'Warning')
-    .map((r) => r.rule)
-}
-
-function toNextStep(project: Project, pick: Pick): NextStep {
-  const task = pick.task
-  const agent = task ? task.recommendedAgent : project.recommendedAgent
-  const why = task
-    ? task.whyThisAgent || suggestAgent({ title: task.title, description: task.description }).why
-    : project.whyThisAgent || 'Define the next task, then pick the agent that fits it.'
-  return { project, task, reason: pick.reason, agent, why, cautions: cautionsFor(project) }
-}
-
-// Single project (Project Detail button).
-export function recommendForProject(project: Project): NextStep {
-  return toNextStep(project, pickTask(project))
-}
-
-// Across all projects (Dashboard button). Picks the most urgent task by tier,
-// tie-broken by project order. Returns null only when there are no projects.
-export function recommendNext(projects: Project[]): NextStep | null {
-  if (projects.length === 0) return null
-  let best: { project: Project; pick: Pick } | null = null
-  for (const project of projects) {
-    const pick = pickTask(project)
-    if (!best || pick.tier < best.pick.tier) best = { project, pick }
-  }
-  return best ? toNextStep(best.project, best.pick) : null
+  return 'Continue making progress on your project goals'
 }

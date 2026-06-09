@@ -1,9 +1,32 @@
-import { useEffect, useState } from 'react'
-import type { AppSettings } from '../types'
+import { useReducer, useEffect, useState, type ChangeEvent } from 'react'
+import type { AppSettings, AppData } from '../types'
 import { Section } from '../components/ui'
 
+type Action =
+  | { type: 'SET_THEME'; payload: AppSettings['theme'] }
+  | { type: 'SET_EXPERIENCE_MODE'; payload: AppSettings['experienceMode'] }
+
+const reducer = (state: AppSettings, action: Action): AppSettings => {
+  switch (action.type) {
+    case 'SET_THEME':
+      return { ...state, theme: action.payload }
+    case 'SET_EXPERIENCE_MODE':
+      return { ...state, experienceMode: action.payload }
+    default:
+      return state
+  }
+}
+
+const saveTheme = async (theme: AppSettings['theme']): Promise<void> => {
+  const raw = await window.api.loadData()
+  if (raw) {
+    const data = raw as AppData
+    await window.api.saveData({ ...data, settings: { ...data.settings, theme } })
+  }
+}
+
 export function Settings({
-  settings,
+  settings: initialSettings,
   onChangeExperienceMode,
   onResetSampleData
 }: {
@@ -11,17 +34,36 @@ export function Settings({
   onChangeExperienceMode: (mode: AppSettings['experienceMode']) => void
   onResetSampleData: () => void
 }) {
-  const [dataPath, setDataPath] = useState('~/AIProjectDashboard/app-data.json')
+  const [settings, dispatch] = useReducer(reducer, initialSettings)
+  const [dataPath, setDataPath] = useState('')
 
   useEffect(() => {
-    void window.api.dataPath().then(setDataPath)
+    void window.api.dataPath().then((path) => setDataPath(path))
   }, [])
 
-  const handleReset = () => {
-    const ok = window.confirm(
-      'Reset to sample data? This overwrites your current data with the D.AI.L.Y sample.'
-    )
-    if (ok) onResetSampleData()
+  useEffect(() => {
+    dispatch({ type: 'SET_THEME', payload: initialSettings.theme })
+    dispatch({ type: 'SET_EXPERIENCE_MODE', payload: initialSettings.experienceMode })
+  }, [initialSettings.experienceMode, initialSettings.theme])
+
+  const handleThemeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const updated: AppSettings = { ...settings, theme: e.target.value as AppSettings['theme'] }
+    dispatch({ type: 'SET_THEME', payload: updated.theme })
+    void saveTheme(updated.theme)
+  }
+
+  const handleExperienceModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const updated: AppSettings = { ...settings, experienceMode: e.target.value as AppSettings['experienceMode'] }
+    dispatch({ type: 'SET_EXPERIENCE_MODE', payload: updated.experienceMode })
+    onChangeExperienceMode(updated.experienceMode)
+  }
+
+  const handleResetData = () => {
+    const ok = window.confirm('Reset to sample data? This overwrites your current data with the D.AI.L.Y sample.')
+    if (ok) {
+      onResetSampleData()
+      void window.api.dataPath().then((path) => setDataPath(path))
+    }
   }
 
   return (
@@ -41,7 +83,7 @@ export function Settings({
           <select
             className="select"
             value={settings.experienceMode}
-            onChange={(e) => onChangeExperienceMode(e.target.value as AppSettings['experienceMode'])}
+            onChange={handleExperienceModeChange}
           >
             <option value="builder">Builder</option>
             <option value="expert">Expert</option>
@@ -52,8 +94,8 @@ export function Settings({
 
       <Section title="Theme">
         <div className="field-row">
-          <span className="field-value">Dark</span>
-          <select className="select" defaultValue={settings.theme} disabled>
+          <span className="field-value">{settings.theme}</span>
+          <select className="select" value={settings.theme} onChange={handleThemeChange}>
             <option value="dark">Dark</option>
             <option value="light">Light</option>
           </select>
@@ -66,7 +108,7 @@ export function Settings({
       </Section>
 
       <Section title="Sample data">
-        <button className="btn btn-ghost" onClick={handleReset}>
+        <button className="btn btn-ghost" onClick={handleResetData}>
           Reset sample data
         </button>
       </Section>

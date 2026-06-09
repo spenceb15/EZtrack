@@ -3,7 +3,8 @@ import type { Project } from '../types'
 import { ProjectCard } from '../components/ProjectCard'
 import { EmptyState } from '../components/ui'
 import { RecommendationCard } from '../components/RecommendationCard'
-import { recommendNext } from '../utils/nextStep'
+import { pickProjectForNextStep, recommendNextStep } from '../utils/nextStep'
+import { recommendAgent } from '../utils/recommend'
 
 export function Dashboard({
   projects,
@@ -21,7 +22,14 @@ export function Dashboard({
       : `${count} active project${count === 1 ? '' : 's'} at a glance.`
 
   // Recomputed on each render from current data, so it always reflects edits.
-  const rec = showRec ? recommendNext(projects) : null
+  const recommendedProject = showRec ? pickProjectForNextStep(projects) : null
+  const rec = recommendedProject
+    ? {
+        project: recommendedProject,
+        nextStep: recommendNextStep(recommendedProject),
+        agentRecommendation: recommendAgent(recommendedProject)
+      }
+    : null
 
   return (
     <div className="page">
